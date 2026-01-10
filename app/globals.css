@@ -1,26 +1,271 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  /* Cores da Extrema */
+  --extrema-purple-500: #8B4FD3;
+  --extrema-purple-600: #7640B8;
+  --extrema-purple-700: #5F33A0;
+  --extrema-yellow-500: #FFD93D;
+  --extrema-yellow-600: #F7C428;
+  --accent-500: #6C63FF;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Status */
+  --status-rascunho: #718096;
+  --status-enviada: #4299e1;
+  --status-aguardando: #ed8936;
+  --status-comprovante: #9f7aea;
+  --status-paga: #48bb78;
+  --status-recusada: #f56565;
+  --status-expirada: #4a5568;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Fundacionais */
+  --background: #f7fafc;
+  --surface: #ffffff;
+  --text-primary: #2d3748;
+  --text-secondary: #718096;
+  --border: #e2e8f0;
 }
 
 body {
   background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--text-primary);
+}
+
+/* Botões */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(139, 79, 211, 0.5);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background-color: var(--extrema-purple-500);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--extrema-purple-600);
+  transform: scale(0.98);
+}
+
+.btn-secondary {
+  background-color: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #f9fafb;
+}
+
+.btn-accent {
+  background-color: var(--accent-500);
+  color: white;
+}
+
+.btn-accent:hover:not(:disabled) {
+  background-color: #5649E6;
+}
+
+.btn-outline {
+  border: 1px solid var(--extrema-purple-500);
+  color: var(--extrema-purple-500);
+  background-color: transparent;
+}
+
+.btn-outline:hover:not(:disabled) {
+  background-color: var(--extrema-purple-500);
+  color: white;
+}
+
+.btn-ghost {
+  color: #374151;
+  background-color: transparent;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background-color: #f3f4f6;
+}
+
+.btn-danger {
+  background-color: #ef4444;
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #dc2626;
+}
+
+/* Cards */
+.card {
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.card-hover {
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s;
+}
+
+.card-hover:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-color: #d1d5db;
+}
+
+/* Inputs */
+.input {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.input:focus {
+  border-color: transparent;
+  box-shadow: 0 0 0 2px var(--extrema-purple-500);
+}
+
+.input-error {
+  border-color: #ef4444;
+}
+
+.input-error:focus {
+  box-shadow: 0 0 0 2px #ef4444;
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge-rascunho {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.badge-enviada {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-aguardando {
+  background-color: #fed7aa;
+  color: #9a3412;
+}
+
+.badge-comprovante {
+  background-color: #e9d5ff;
+  color: #6b21a8;
+}
+
+.badge-paga {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.badge-recusada {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.badge-expirada {
+  background-color: #e5e7eb;
+  color: #4b5563;
+}
+
+/* Glassmorphism */
+.glass {
+  backdrop-filter: blur(12px);
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.glass-dark {
+  backdrop-filter: blur(12px);
+  background-color: rgba(17, 24, 39, 0.8);
+  border: 1px solid rgba(31, 41, 55, 0.2);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Gradientes */
+.gradient-extrema {
+  background: linear-gradient(135deg, #8B4FD3 0%, #6C63FF 100%);
+}
+
+.gradient-extrema-reverse {
+  background: linear-gradient(135deg, #6C63FF 0%, #8B4FD3 100%);
+}
+
+/* Animações */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-scale {
+  animation: scale 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scale {
+  from {
+    transform: scale(0.95);
+  }
+
+  to {
+    transform: scale(1);
+  }
 }
