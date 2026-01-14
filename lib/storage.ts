@@ -21,6 +21,10 @@ export interface Produto {
     nome: string;
     descricao: string;
     modulos: string[];
+    limites: {
+        qtdCnpjs: number;
+        qtdUsuarios: number;
+    };
 }
 
 export interface Valores {
@@ -117,6 +121,11 @@ export interface Proposta {
     // Valores
     valores: Valores;
 
+    // Detalhamento do Escopo
+    detalhesInvestimento?: string; // O que está incluso no setup
+    detalhesMensalidade?: string;  // O que está incluso na mensalidade
+    reajuste?: string;             // Ex: IGPM Anual
+
     // Condições
     condicoesPagamento: string;
     validadeDias: number;
@@ -134,6 +143,10 @@ export interface Template {
     produto: Produto;
     valores: Omit<Valores, 'descontoAvistaValor' | 'valorAvista'>;
     condicoesPagamento: string;
+    // Detalhamento Padrão
+    detalhesInvestimento?: string;
+    detalhesMensalidade?: string;
+    reajuste?: string;
     createdAt: string;
 }
 
@@ -154,6 +167,25 @@ export interface Configuracoes {
             favorecido: string;
         };
         logo: string;
+    };
+    integracoes: {
+        modoPix: 'estatico' | 'api';
+        ailos: {
+            clientId: string;
+            clientSecret: string;
+            certPath: string; // Caminho no servidor
+            keyPath: string;  // Caminho no servidor
+        }
+    };
+    secoesProposta: {
+        introducao: string;
+        visao: string;
+        missao: string;
+        negocio: string;
+        vantagensTitulo: string;
+        experiencia: string;
+        consultores: string;
+        suporte: string;
     };
     numeroPropostaAtual: number;
 }
@@ -289,7 +321,7 @@ export const logout = (): void => {
 // ==================== CONFIGURAÇÕES ====================
 
 export const getConfiguracoes = (): Configuracoes => {
-    return getStorageItem<Configuracoes>(STORAGE_KEYS.CONFIGURACOES, {
+    const defaultSettings: Configuracoes = {
         empresa: {
             razaoSocial: 'Extrema Software de Gestão Empresarial',
             nomeFantasia: 'Extrema Tecnologia',
@@ -307,8 +339,47 @@ export const getConfiguracoes = (): Configuracoes => {
             },
             logo: '/extrema-logo.jpg',
         },
+        integracoes: {
+            modoPix: 'estatico',
+            ailos: {
+                clientId: '',
+                clientSecret: '',
+                certPath: '',
+                keyPath: '',
+            }
+        },
+        secoesProposta: {
+            introducao: 'A mais de 12 anos trabalhando com software de Gestão e Automação Comercial.',
+            visao: 'Ser a empresa de soluções de tecnologia da informação para pequenas, médias e grandes empresas mais competitiva do mercado e referência por sua credibilidade e tecnologia em produtos e serviços.',
+            missao: 'Ajudar pequenas, medias e grandes empresas a ter sucesso por meio da gestão da informação, fazendo uso de tecnologia de ponta e inovadora.',
+            negocio: 'Fornecer softwares para controle e gerenciamento das atividades de negócios dos seus clientes.\\nValores, Ética, Inovação, Conhecimento, Qualidade, Comprometimento, Resultados.',
+            vantagensTitulo: 'Quais as vantagens – Por que devo confiar na Extrema!',
+            experiencia: 'Mais de 12 anos de experiência com Softwares de Gestão;\\n• Atua no fornecimento de Sistema para gestão comercial;\\n• Amplo conhecimento em Automação Comercial.',
+            consultores: 'A equipe é formada especialistas nas áreas administrativas, contábeis e tributárias.',
+            suporte: 'Trabalhamos com tecnologia de ponta para atender aos chamados de suporte técnico através:\\n➢ WhatsApp\\n➢ Acesso remoto (Acessamos sua base através da Internet);\\n➢ Telefone;\\n➢ In loco.'
+        },
         numeroPropostaAtual: 1,
-    });
+    };
+
+    const stored = getStorageItem<Configuracoes>(STORAGE_KEYS.CONFIGURACOES, defaultSettings);
+
+    // Merge profundo para garantir que novos campos existam
+    return {
+        ...defaultSettings,
+        ...stored,
+        integracoes: {
+            ...defaultSettings.integracoes,
+            ...(stored.integracoes || {}),
+            ailos: {
+                ...defaultSettings.integracoes.ailos,
+                ...(stored.integracoes?.ailos || {})
+            }
+        },
+        secoesProposta: {
+            ...defaultSettings.secoesProposta,
+            ...(stored.secoesProposta || {})
+        }
+    };
 };
 
 export const saveConfiguracoes = (config: Configuracoes): void => {
@@ -368,6 +439,10 @@ export const seedInitialData = (): void => {
                     'Nota Fiscal Eletrônica (NF-e/NFC-e)',
                     'Relatórios Gerenciais',
                 ],
+                limites: {
+                    qtdCnpjs: 1,
+                    qtdUsuarios: 2
+                }
             },
             valores: {
                 investimentoInicial: 1170.0,
@@ -381,6 +456,9 @@ export const seedInitialData = (): void => {
             },
             condicoesPagamento:
                 'Entrada via PIX + 2 boletos (30 e 60 dias). Mensalidade cobrada após 30 dias da assinatura.',
+            detalhesInvestimento: 'Instalação remota, Configuração inicial, Treinamento online (4 horas).',
+            detalhesMensalidade: 'Licença de uso, Suporte técnico (seg-sex 08h às 18h), Atualizações fiscais.',
+            reajuste: 'Anual (IGPM acumulado)',
             createdAt: new Date().toISOString(),
         },
     ];

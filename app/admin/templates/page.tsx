@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { getTemplates, saveTemplate, deleteTemplate } from '@/lib/storage';
+import { gerarDescricaoCondicoes } from '@/lib/utils';
 import type { Template } from '@/lib/storage';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -29,6 +30,11 @@ export default function TemplatesPage() {
     const [valorParcela, setValorParcela] = useState('');
     const [mensalidade, setMensalidade] = useState('');
     const [condicoesPagamento, setCondicoesPagamento] = useState('');
+    const [qtdCnpjs, setQtdCnpjs] = useState('1');
+    const [qtdUsuarios, setQtdUsuarios] = useState('1');
+    const [detalhesInvestimento, setDetalhesInvestimento] = useState('');
+    const [detalhesMensalidade, setDetalhesMensalidade] = useState('');
+    const [reajuste, setReajuste] = useState('Anual (IGPM acumulado)');
 
     const carregarTemplates = () => {
         setTemplates(getTemplates());
@@ -37,6 +43,47 @@ export default function TemplatesPage() {
     useEffect(() => {
         carregarTemplates();
     }, []);
+
+    // Atualização automática do texto de condições
+    useEffect(() => {
+        if (!editando && investimentoInicial && qtdParcelas && mensalidade) {
+            const inv = parseFloat(investimentoInicial);
+            const parc = parseInt(qtdParcelas);
+            const valParc = inv / (parc || 1);
+            const mens = parseFloat(mensalidade);
+
+            if (!isNaN(inv) && !isNaN(parc) && !isNaN(mens)) {
+                setCondicoesPagamento(gerarDescricaoCondicoes(inv, parc, valParc, mens));
+            }
+        }
+    }, [investimentoInicial, qtdParcelas, mensalidade, editando]);
+
+    // Auto-cálculo do valor da parcela
+    useEffect(() => {
+        if (!editando && investimentoInicial && qtdParcelas) {
+            const inv = parseFloat(investimentoInicial);
+            const parc = parseInt(qtdParcelas);
+
+            if (!isNaN(inv) && !isNaN(parc) && parc > 0) {
+                const val = inv / parc;
+                // Formata para 2 casas decimais para visualização no input
+                setValorParcela(val.toFixed(2));
+            }
+        }
+    }, [investimentoInicial, qtdParcelas, editando]);
+
+    // Atualização automática dos detalhes da mensalidade (texto dinâmico)
+    useEffect(() => {
+        if (!editando && qtdCnpjs && qtdUsuarios) {
+            const textoMensalidade = `Investimento em mensalidade para ${qtdCnpjs} CNPJ${parseInt(qtdCnpjs) > 1 ? 's' : ''} e ${qtdUsuarios} usuário${parseInt(qtdUsuarios) > 1 ? 's' : ''}.
+Obs.: Início da cobrança 30 dias após a assinatura da proposta.
+* Concede direito as atualizações de versão do sistema (regras de negócio, alterações legais/legislação) e suporte técnico via telefone, e-mail e whatsapp. Este valor é reajustado anualmente pelo IGP-M ou por outro índice que venha a substituí-lo.`;
+
+            // Só atualiza se o campo estiver vazio ou se o usuário não tiver editado manualmente (podemos usar uma flag ou verificação simples)
+            // Aqui vamos assumir que se for novo template (!editando), sempre atualiza
+            setDetalhesMensalidade(textoMensalidade);
+        }
+    }, [qtdCnpjs, qtdUsuarios, editando]);
 
     const limparForm = () => {
         setNome('');
@@ -52,8 +99,25 @@ export default function TemplatesPage() {
         setValorParcela('');
         setMensalidade('');
         setCondicoesPagamento('');
+        setQtdCnpjs('1');
+        setQtdUsuarios('1');
+        setDetalhesInvestimento('Ref. implantação, configurações iniciais e treinamento (02 agendas).');
+        setDetalhesMensalidade('');
+        setReajuste('Anual (IGPM acumulado)');
+        setEditando(null);
         setEditando(null);
         setMostrarForm(false);
+    };
+
+    const handleNovoTemplate = () => {
+        limparForm();
+        // Set defaults for new template
+        setQtdCnpjs('1');
+        setQtdUsuarios('1');
+        setDetalhesInvestimento('Ref. implantação, configurações iniciais e treinamento (02 agendas).');
+        setDetalhesMensalidade('');
+        setReajuste('Anual (IGPM acumulado)');
+        setMostrarForm(true);
     };
 
     const adicionarModulo = () => {
@@ -121,6 +185,10 @@ export default function TemplatesPage() {
                 nome: produtoNome,
                 descricao: produtoDescricao,
                 modulos,
+                limites: {
+                    qtdCnpjs: parseInt(qtdCnpjs),
+                    qtdUsuarios: parseInt(qtdUsuarios)
+                }
             },
             valores: {
                 investimentoInicial: parseFloat(investimentoInicial),
@@ -133,6 +201,9 @@ export default function TemplatesPage() {
                 mensalidade: parseFloat(mensalidade),
             },
             condicoesPagamento,
+            detalhesInvestimento,
+            detalhesMensalidade,
+            reajuste,
             createdAt: editando?.createdAt || new Date().toISOString(),
         };
 
@@ -152,7 +223,14 @@ export default function TemplatesPage() {
         setQtdParcelas(template.valores.parcelamento.qtdParcelas.toString());
         setValorParcela(template.valores.parcelamento.valorParcela.toString());
         setMensalidade(template.valores.mensalidade.toString());
+        setMensalidade(template.valores.mensalidade.toString());
         setCondicoesPagamento(template.condicoesPagamento);
+        // Default configs
+        setQtdCnpjs(template.produto.limites?.qtdCnpjs?.toString() || '1');
+        setQtdUsuarios(template.produto.limites?.qtdUsuarios?.toString() || '1');
+        setDetalhesInvestimento(template.detalhesInvestimento || '');
+        setDetalhesMensalidade(template.detalhesMensalidade || '');
+        setReajuste(template.reajuste || 'Anual (IGPM acumulado)');
         setMostrarForm(true);
     };
 
@@ -163,6 +241,24 @@ export default function TemplatesPage() {
         }
     };
 
+    const handleDuplicar = (template: Template) => {
+        if (!confirm(`Deseja duplicar o template "${template.nome}"?`)) return;
+
+        const novoTemplate: Template = {
+            ...JSON.parse(JSON.stringify(template)),
+            id: uuidv4(),
+            nome: `${template.nome} (Cópia)`,
+            vendedorId: user?.id || null,
+            createdAt: new Date().toISOString(),
+        };
+
+        // Garantir que não estamos copiando referências indesejadas se houver
+        // No caso do JSON.parse/stringify já resolveu a deep copy dos objetos aninhados (produto, valores)
+
+        saveTemplate(novoTemplate);
+        carregarTemplates();
+    };
+
     return (
         <div>
             <div className="flex justify-between items-center mb-6">
@@ -171,7 +267,7 @@ export default function TemplatesPage() {
                     <p className="text-sm text-gray-600 mt-1">Crie modelos reutilizáveis para agilizar suas propostas</p>
                 </div>
                 <button
-                    onClick={() => setMostrarForm(true)}
+                    onClick={handleNovoTemplate}
                     className="btn btn-primary"
                 >
                     + Novo Template
@@ -201,6 +297,13 @@ export default function TemplatesPage() {
                                     className="btn btn-secondary btn-sm flex-1"
                                 >
                                     Editar
+                                </button>
+                                <button
+                                    onClick={() => handleDuplicar(template)}
+                                    className="btn btn-ghost btn-sm text-blue-600"
+                                    title="Duplicar Template"
+                                >
+                                    Duplicar
                                 </button>
                                 {template.vendedorId && (
                                     <button
@@ -265,6 +368,29 @@ export default function TemplatesPage() {
                             </div>
                         </div>
 
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Qtd. CNPJs</label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={qtdCnpjs}
+                                    onChange={(e) => setQtdCnpjs(e.target.value)}
+                                    className="input"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Qtd. Usuários</label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={qtdUsuarios}
+                                    onChange={(e) => setQtdUsuarios(e.target.value)}
+                                    className="input"
+                                />
+                            </div>
+                        </div>
+
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Módulos/Funcionalidades</label>
                             <div className="space-y-2">
@@ -302,8 +428,8 @@ export default function TemplatesPage() {
                                         ) : (
                                             <>
                                                 <div className={`flex-1 px-3 py-2 rounded-lg text-sm transition-all duration-500 ${moduloMovido === index
-                                                        ? 'bg-yellow-100 border-2 border-yellow-400 shadow-md'
-                                                        : 'bg-gray-50'
+                                                    ? 'bg-yellow-100 border-2 border-yellow-400 shadow-md'
+                                                    : 'bg-gray-50'
                                                     }`}>
                                                     {modulo}
                                                 </div>
@@ -405,6 +531,17 @@ export default function TemplatesPage() {
                                     className="input"
                                 />
                             </div>
+
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Detalhes do Investimento Inicial (O que está incluso?)</label>
+                                <textarea
+                                    value={detalhesInvestimento}
+                                    onChange={(e) => setDetalhesInvestimento(e.target.value)}
+                                    className="input"
+                                    rows={2}
+                                    placeholder="Ex: Instalação remota, Configuração inicial, Treinamento (4h)"
+                                />
+                            </div>
                             <div className="md:col-span-2">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Mensalidade (R$) *</label>
                                 <input
@@ -415,7 +552,19 @@ export default function TemplatesPage() {
                                     className="input"
                                 />
                             </div>
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Detalhes da Mensalidade (O que está incluso?)</label>
+                                <textarea
+                                    value={detalhesMensalidade}
+                                    onChange={(e) => setDetalhesMensalidade(e.target.value)}
+                                    className="input"
+                                    rows={2}
+                                    placeholder="Ex: Licença de uso, Suporte técnico, Backup em nuvem"
+                                />
+                            </div>
                         </div>
+
+
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Condições de Pagamento</label>
@@ -438,7 +587,8 @@ export default function TemplatesPage() {
                         </button>
                     </div>
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 }

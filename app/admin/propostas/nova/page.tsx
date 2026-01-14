@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { saveProposta, incrementarNumeroProposta, getTemplates } from '@/lib/storage';
-import { generateHash, generatePropostaNumero, calcularDescontoAvista, calcularDataValidade } from '@/lib/utils';
+import { generateHash, generatePropostaNumero, calcularDescontoAvista, calcularDataValidade, gerarDescricaoCondicoes } from '@/lib/utils';
 import type { Proposta, Template } from '@/lib/storage';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -27,6 +27,8 @@ export default function NovaProposta() {
     const [produtoDescricao, setProdutoDescricao] = useState('');
     const [modulos, setModulos] = useState<string[]>([]);
     const [novoModulo, setNovoModulo] = useState('');
+    const [qtdCnpjs, setQtdCnpjs] = useState('1');
+    const [qtdUsuarios, setQtdUsuarios] = useState('1');
 
     // Valores
     const [investimentoInicial, setInvestimentoInicial] = useState('1170.00');
@@ -34,19 +36,42 @@ export default function NovaProposta() {
     const [qtdParcelas, setQtdParcelas] = useState('3');
     const [valorParcela, setValorParcela] = useState('390.00');
     const [mensalidade, setMensalidade] = useState('199.90');
+    const [detalhesInvestimento, setDetalhesInvestimento] = useState('');
+    const [detalhesMensalidade, setDetalhesMensalidade] = useState('');
 
     // Condições
-    const [condicoesPagamento, setCondicoesPagamento] = useState('Entrada via PIX + 2 boletos (30 e 60 dias). Mensalidade cobrada após 30 dias da assinatura.');
+    const [condicoesPagamento, setCondicoesPagamento] = useState('');
     const [validadeDias, setValidadeDias] = useState('15');
     const [observacoes, setObservacoes] = useState('');
+    const [reajuste, setReajuste] = useState('Anual (IGPM acumulado)');
 
     // Cálculo automático do valor da parcela
     useEffect(() => {
         if (investimentoInicial && qtdParcelas) {
-            const valorCalculado = (parseFloat(investimentoInicial) / parseInt(qtdParcelas)).toFixed(2);
-            setValorParcela(valorCalculado);
+            const qtd = parseInt(qtdParcelas);
+            if (qtd > 0) {
+                const valorCalculado = (parseFloat(investimentoInicial) / qtd).toFixed(2);
+                setValorParcela(valorCalculado);
+            } else {
+                setValorParcela('0.00');
+            }
         }
     }, [investimentoInicial, qtdParcelas]);
+
+    // Atualização automática das condições (apenas se não estiver bloqueado ou se o usuário quiser)
+    // Para simplificar "pra ver", vamos atualizar sempre que os valores mudarem se a etapa for 'valores' ou anterior
+    useEffect(() => {
+        if (investimentoInicial && qtdParcelas && mensalidade) {
+            const inv = parseFloat(investimentoInicial);
+            const parc = parseInt(qtdParcelas);
+            const valParc = parseFloat(valorParcela);
+            const mens = parseFloat(mensalidade);
+
+            if (!isNaN(inv) && !isNaN(parc) && !isNaN(mens)) {
+                setCondicoesPagamento(gerarDescricaoCondicoes(inv, parc, valParc, mens));
+            }
+        }
+    }, [investimentoInicial, qtdParcelas, valorParcela, mensalidade]);
 
     const aplicarTemplate = (template: Template) => {
         setTemplateSelecionado(template);
@@ -59,6 +84,16 @@ export default function NovaProposta() {
         setValorParcela(template.valores.parcelamento.valorParcela.toString());
         setMensalidade(template.valores.mensalidade.toString());
         setCondicoesPagamento(template.condicoesPagamento);
+        setQtdParcelas(template.valores.parcelamento.qtdParcelas.toString());
+        setValorParcela(template.valores.parcelamento.valorParcela.toString());
+        setMensalidade(template.valores.mensalidade.toString());
+        setDetalhesInvestimento(template.detalhesInvestimento || '');
+        setDetalhesMensalidade(template.detalhesMensalidade || '');
+        setReajuste(template.reajuste || 'Anual (IGPM acumulado)');
+        setCondicoesPagamento(template.condicoesPagamento);
+        // Default limits if not in template (backward compatibility)
+        setQtdCnpjs(template.produto.limites?.qtdCnpjs?.toString() || '1');
+        setQtdUsuarios(template.produto.limites?.qtdUsuarios?.toString() || '1');
         setEtapa('cliente');
     };
 
@@ -102,6 +137,10 @@ export default function NovaProposta() {
                 nome: produtoNome,
                 descricao: produtoDescricao,
                 modulos: modulos,
+                limites: {
+                    qtdCnpjs: parseInt(qtdCnpjs),
+                    qtdUsuarios: parseInt(qtdUsuarios)
+                }
             },
             valores: {
                 investimentoInicial: investimento,
@@ -116,6 +155,9 @@ export default function NovaProposta() {
                 mensalidade: parseFloat(mensalidade),
             },
             condicoesPagamento,
+            detalhesInvestimento,
+            detalhesMensalidade,
+            reajuste,
             validadeDias: parseInt(validadeDias),
             dataValidade,
             observacoes,
@@ -398,6 +440,26 @@ export default function NovaProposta() {
                                 required
                             />
                         </div>
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Detalhes do Investimento Inicial (O que está incluso?)</label>
+                            <textarea
+                                value={detalhesInvestimento}
+                                onChange={(e) => setDetalhesInvestimento(e.target.value)}
+                                className="input"
+                                rows={2}
+                                placeholder="Ex: Instalação remota, Configuração inicial, Treinamento (4h)"
+                            />
+                        </div>
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Detalhes da Mensalidade (O que está incluso?)</label>
+                            <textarea
+                                value={detalhesMensalidade}
+                                onChange={(e) => setDetalhesMensalidade(e.target.value)}
+                                className="input"
+                                rows={2}
+                                placeholder="Ex: Licença de uso, Suporte técnico, Backup em nuvem"
+                            />
+                        </div>
                     </div>
 
                     {/* Preview de valores calculados */}
@@ -406,7 +468,9 @@ export default function NovaProposta() {
                         <div className="space-y-1 text-sm text-gray-600">
                             <p>• Investimento: R$ {parseFloat(investimentoInicial || '0').toFixed(2)}</p>
                             <p>• À vista ({descontoPercentual}% desc): R$ {(parseFloat(investimentoInicial || '0') * (1 - parseFloat(descontoPercentual || '0') / 100)).toFixed(2)}</p>
-                            <p>• Parcelado: {qtdParcelas}x de R$ {parseFloat(valorParcela || '0').toFixed(2)} = R$ {(parseFloat(valorParcela || '0') * parseInt(qtdParcelas || '0')).toFixed(2)}</p>
+                            {parseInt(qtdParcelas || '0') > 1 && (
+                                <p>• Parcelado: {qtdParcelas}x de R$ {parseFloat(valorParcela || '0').toFixed(2)} = R$ {(parseFloat(valorParcela || '0') * parseInt(qtdParcelas || '0')).toFixed(2)}</p>
+                            )}
                             <p>• Mensalidade: R$ {parseFloat(mensalidade || '0').toFixed(2)}/mês</p>
                         </div>
                     </div>

@@ -1,4 +1,5 @@
 import { jsPDF } from 'jspdf';
+import { getConfiguracoes } from './storage';
 import type { Proposta } from './storage';
 import { formatCurrency, formatDate } from './utils';
 
@@ -26,6 +27,8 @@ export async function gerarPDFProposta(proposta: Proposta, options?: { comAceite
         const pageHeight = doc.internal.pageSize.getHeight();
         const margin = 20;
         let yPos = 20;
+
+        const config = getConfiguracoes();
 
         // Determinar quais dados usar (Original vs Aceite/Rascunho)
         const dadosCadastrais = options?.comAceite
@@ -56,6 +59,71 @@ export async function gerarPDFProposta(proposta: Proposta, options?: { comAceite
         doc.text(validadeText, pageWidth - margin - validadeWidth, 35);
 
         yPos = 55;
+
+        // ==================== INSTITUCIONAL (SEÇÕES FIXAS) ====================
+        if (config.secoesProposta) {
+            // Introdução
+            if (config.secoesProposta.introducao) {
+                doc.setTextColor(...COLORS.black);
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                const introLines = doc.splitTextToSize(config.secoesProposta.introducao, pageWidth - 2 * margin);
+                doc.text(introLines, margin, yPos);
+                yPos += introLines.length * 5 + 5;
+            }
+
+            // Visão, Missão, Negócio (Grid)
+            const colWidth = (pageWidth - 2 * margin) / 3 - 5;
+            let maxH = 0;
+
+            // Visão
+            if (config.secoesProposta.visao) {
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(...COLORS.purple);
+                doc.text('Visão', margin, yPos);
+
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(...COLORS.gray);
+                doc.setFontSize(8);
+                const lines = doc.splitTextToSize(config.secoesProposta.visao, colWidth);
+                doc.text(lines, margin, yPos + 5);
+                maxH = Math.max(maxH, lines.length * 4);
+            }
+
+            // Missão
+            if (config.secoesProposta.missao) {
+                const x = margin + colWidth + 5;
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(...COLORS.purple);
+                doc.setFontSize(10);
+                doc.text('Missão', x, yPos);
+
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(...COLORS.gray);
+                doc.setFontSize(8);
+                const lines = doc.splitTextToSize(config.secoesProposta.missao, colWidth);
+                doc.text(lines, x, yPos + 5);
+                maxH = Math.max(maxH, lines.length * 4);
+            }
+
+            // Negócio
+            if (config.secoesProposta.negocio) {
+                const x = margin + 2 * (colWidth + 5);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(...COLORS.purple);
+                doc.setFontSize(10);
+                doc.text('Negócio', x, yPos);
+
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(...COLORS.gray);
+                doc.setFontSize(8);
+                const lines = doc.splitTextToSize(config.secoesProposta.negocio, colWidth);
+                doc.text(lines, x, yPos + 5);
+                maxH = Math.max(maxH, lines.length * 4);
+            }
+
+            if (maxH > 0) yPos += maxH + 15;
+        }
 
         // ==================== DADOS DA EMPRESA (EXTREMA) ====================
         doc.setTextColor(...COLORS.gray);
@@ -139,6 +207,19 @@ export async function gerarPDFProposta(proposta: Proposta, options?: { comAceite
         doc.setFont('helvetica', 'bold');
         doc.text('Módulos/Funcionalidades Incluídas:', margin, yPos);
 
+        // Exibir Limites (CNPJs e Usuários)
+        const limitesText = proposta.produto.limites
+            ? `(${proposta.produto.limites.qtdCnpjs} CNPJ${proposta.produto.limites.qtdCnpjs > 1 ? 's' : ''}, ${proposta.produto.limites.qtdUsuarios} Usuário${proposta.produto.limites.qtdUsuarios > 1 ? 's' : ''})`
+            : '';
+
+        if (limitesText) {
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            doc.setTextColor(...COLORS.gray);
+            const titleWidth = doc.getTextWidth('Módulos/Funcionalidades Incluídas:');
+            doc.text(limitesText, margin + titleWidth + 2, yPos);
+        }
+
         yPos += 6;
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(...COLORS.gray);
@@ -165,56 +246,109 @@ export async function gerarPDFProposta(proposta: Proposta, options?: { comAceite
         yPos += 15;
 
         // Tabela de valores
-        const colWidth = (pageWidth - 2 * margin) / 2 - 5;
+        // Tabela de valores
+        const isParcelado = proposta.valores.parcelamento.qtdParcelas > 1;
 
-        // Coluna À Vista
-        doc.setFillColor(236, 253, 245); // green-50
-        doc.rect(margin, yPos, colWidth, 45, 'F');
+        if (isParcelado) {
+            const colWidth = (pageWidth - 2 * margin) / 2 - 5;
 
-        doc.setTextColor(...COLORS.black);
-        doc.setFontSize(11);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Pagamento à Vista', margin + 5, yPos + 8);
+            // Coluna À Vista
+            doc.setFillColor(236, 253, 245); // green-50
+            doc.rect(margin, yPos, colWidth, 45, 'F');
 
-        doc.setFillColor(...COLORS.green);
-        doc.roundedRect(margin + colWidth - 25, yPos + 3, 20, 7, 1, 1, 'F');
-        doc.setTextColor(...COLORS.white);
-        doc.setFontSize(8);
-        doc.text(`-${proposta.valores.descontoAvistaPercentual}%`, margin + colWidth - 22, yPos + 8);
+            doc.setTextColor(...COLORS.black);
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Pagamento à Vista', margin + 5, yPos + 8);
 
-        doc.setTextColor(...COLORS.gray);
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'normal');
-        doc.text(`Valor original: ${formatCurrency(proposta.valores.investimentoInicial)}`, margin + 5, yPos + 18);
-        doc.text(`Desconto: -${formatCurrency(proposta.valores.descontoAvistaValor)}`, margin + 5, yPos + 25);
+            doc.setFillColor(...COLORS.green);
+            doc.roundedRect(margin + colWidth - 25, yPos + 3, 20, 7, 1, 1, 'F');
+            doc.setTextColor(...COLORS.white);
+            doc.setFontSize(8);
+            doc.text(`-${proposta.valores.descontoAvistaPercentual}%`, margin + colWidth - 22, yPos + 8);
 
-        doc.setTextColor(...COLORS.green);
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.text(`${formatCurrency(proposta.valores.valorAvista)}`, margin + 5, yPos + 38);
+            doc.setTextColor(...COLORS.gray);
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Valor original: ${formatCurrency(proposta.valores.investimentoInicial)}`, margin + 5, yPos + 18);
+            doc.text(`Desconto: -${formatCurrency(proposta.valores.descontoAvistaValor)}`, margin + 5, yPos + 25);
 
-        // Coluna Parcelado
-        const col2X = margin + colWidth + 10;
-        doc.setFillColor(...COLORS.lightGray);
-        doc.rect(col2X, yPos, colWidth, 45, 'F');
+            doc.setTextColor(...COLORS.green);
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text(`${formatCurrency(proposta.valores.valorAvista)}`, margin + 5, yPos + 38);
 
-        doc.setTextColor(...COLORS.black);
-        doc.setFontSize(11);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Pagamento Parcelado', col2X + 5, yPos + 8);
+            // Coluna Parcelado
+            const col2X = margin + colWidth + 10;
+            doc.setFillColor(...COLORS.lightGray);
+            doc.rect(col2X, yPos, colWidth, 45, 'F');
 
-        doc.setTextColor(...COLORS.gray);
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'normal');
-        doc.text(`${proposta.valores.parcelamento.qtdParcelas}x sem juros`, col2X + 5, yPos + 18);
-        doc.text(`Valor da parcela: ${formatCurrency(proposta.valores.parcelamento.valorParcela)}`, col2X + 5, yPos + 25);
+            doc.setTextColor(...COLORS.black);
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Pagamento Parcelado', col2X + 5, yPos + 8);
 
-        doc.setTextColor(...COLORS.purple);
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.text(`${formatCurrency(proposta.valores.parcelamento.valorTotal)}`, col2X + 5, yPos + 38);
+            doc.setTextColor(...COLORS.gray);
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`${proposta.valores.parcelamento.qtdParcelas}x sem juros`, col2X + 5, yPos + 18);
+            doc.text(`Valor da parcela: ${formatCurrency(proposta.valores.parcelamento.valorParcela)}`, col2X + 5, yPos + 25);
 
-        yPos += 55;
+            doc.setTextColor(...COLORS.purple);
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text(`${formatCurrency(proposta.valores.parcelamento.valorTotal)}`, col2X + 5, yPos + 38);
+        } else {
+            // Pagamento somente à vista - Layout Centralizado/Unificado
+            const colWidth = pageWidth - 2 * margin; // Largura total
+
+            doc.setFillColor(236, 253, 245); // green-50
+            doc.rect(margin, yPos, colWidth, 45, 'F');
+
+            doc.setTextColor(...COLORS.black);
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Pagamento à Vista', margin + 5, yPos + 8);
+
+            doc.setFillColor(...COLORS.green);
+            // Ajustar badge para ficar mais à direita, mas não no extremo canto se for full width
+            doc.roundedRect(margin + 150, yPos + 3, 20, 7, 1, 1, 'F'); // Posição fixa relativa
+            doc.setTextColor(...COLORS.white);
+            doc.setFontSize(8);
+            doc.text(`-${proposta.valores.descontoAvistaPercentual}%`, margin + 153, yPos + 8);
+
+            doc.setTextColor(...COLORS.gray);
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+
+            // Layout horizontal para À Vista Full Width
+            // Coluna 1: Labels
+            doc.text(`Valor original: ${formatCurrency(proposta.valores.investimentoInicial)}`, margin + 5, yPos + 18);
+            doc.text(`Desconto: -${formatCurrency(proposta.valores.descontoAvistaValor)}`, margin + 5, yPos + 25);
+
+            // Coluna 2: Valor Final (Em destaque à direita)
+            doc.setTextColor(...COLORS.green);
+            doc.setFontSize(20); // Maior destaque
+            doc.setFont('helvetica', 'bold');
+            doc.text(`${formatCurrency(proposta.valores.valorAvista)}`, margin + colWidth - 55, yPos + 30);
+            doc.setFontSize(9);
+            doc.text('Valor Final', margin + colWidth - 55, yPos + 18);
+        }
+
+        // Detalhes do Investimento (se houver)
+        if (proposta.detalhesInvestimento) {
+            yPos += 1;
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            doc.setTextColor(...COLORS.gray);
+            doc.text('Incluso no investimento:', margin, yPos);
+
+            const investmentDetailsParams = doc.splitTextToSize(proposta.detalhesInvestimento, pageWidth - 2 * margin);
+            doc.text(investmentDetailsParams, margin, yPos + 5);
+            yPos += investmentDetailsParams.length * 4 + 5;
+        }
+
+        yPos += 50;
 
         // ==================== MENSALIDADE ====================
         doc.setFillColor(...COLORS.purple);
@@ -234,7 +368,33 @@ export async function gerarPDFProposta(proposta: Proposta, options?: { comAceite
         const mensalidadeInfo = 'Cobrada após 30 dias da assinatura';
         doc.text(mensalidadeInfo, pageWidth - margin - doc.getTextWidth(mensalidadeInfo) - 5, yPos + 15);
 
-        yPos += 35;
+        // Detalhes da Mensalidade e Reajuste
+        yPos += 30;
+
+        if (proposta.detalhesMensalidade || proposta.reajuste) {
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            doc.setTextColor(...COLORS.gray);
+
+            let currentY = yPos;
+
+            if (proposta.detalhesMensalidade) {
+                doc.text('Incluso na mensalidade:', margin, currentY);
+                const mensalDetailsParams = doc.splitTextToSize(proposta.detalhesMensalidade, pageWidth - 2 * margin);
+                doc.text(mensalDetailsParams, margin, currentY + 5);
+                currentY += mensalDetailsParams.length * 4 + 8;
+            }
+
+            if (proposta.reajuste) {
+                doc.setFont('helvetica', 'bold');
+                doc.text(`Reajuste: ${proposta.reajuste}`, margin, currentY);
+                currentY += 8;
+            }
+
+            yPos = currentY + 10;
+        } else {
+            yPos += 10;
+        }
 
         // ==================== CONDIÇÕES DE PAGAMENTO ====================
         doc.setTextColor(...COLORS.black);
@@ -251,6 +411,65 @@ export async function gerarPDFProposta(proposta: Proposta, options?: { comAceite
         doc.text(condicoesLines, margin, yPos);
 
         yPos += condicoesLines.length * 5 + 15;
+
+        // ==================== APOIO E SUPORTE (SEÇÕES FIXAS FINAIS) ====================
+        if (config.secoesProposta) {
+            // Quebra de página se necessário
+            if (yPos > pageHeight - 80) {
+                doc.addPage();
+                yPos = 20;
+            }
+
+            // Título Vantagens
+            doc.setTextColor(...COLORS.purple);
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            const titulo = config.secoesProposta.vantagensTitulo || 'Quais as vantagens – Por que devo confiar na Extrema!';
+            doc.text(titulo, margin, yPos);
+            yPos += 10;
+
+            doc.setFontSize(9);
+
+            // Experiência
+            if (config.secoesProposta.experiencia) {
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(...COLORS.black);
+                doc.text('Experiência:', margin, yPos);
+
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(...COLORS.gray);
+                const lines = doc.splitTextToSize(config.secoesProposta.experiencia, pageWidth - 2 * margin - 10);
+                doc.text(lines, margin + 20, yPos);
+                yPos += lines.length * 4 + 6;
+            }
+
+            // Consultores
+            if (config.secoesProposta.consultores) {
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(...COLORS.black);
+                doc.text('Consultores:', margin, yPos);
+
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(...COLORS.gray);
+                const lines = doc.splitTextToSize(config.secoesProposta.consultores, pageWidth - 2 * margin - 10);
+                doc.text(lines, margin + 20, yPos);
+                yPos += lines.length * 4 + 6;
+            }
+
+            // Suporte
+            if (config.secoesProposta.suporte) {
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(...COLORS.black);
+                doc.text('Help-Desk:', margin, yPos);
+
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(...COLORS.gray);
+                const lines = doc.splitTextToSize(config.secoesProposta.suporte, pageWidth - 2 * margin - 10);
+                doc.text(lines, margin + 20, yPos);
+                yPos += lines.length * 4 + 6;
+            }
+            yPos += 10;
+        }
 
         // ==================== DADOS DO ACEITE & COMPROVANTE ====================
         if (options?.comAceite && proposta.aceite) {

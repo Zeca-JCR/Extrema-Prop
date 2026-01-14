@@ -15,6 +15,7 @@ export default function ListaPropostas() {
     const [filtroStatus, setFiltroStatus] = useState('todas');
     const [busca, setBusca] = useState('');
     const [propostaSelecionada, setPropostaSelecionada] = useState<Proposta | null>(null);
+    const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' }>({ key: 'numero', direction: 'desc' });
 
     // Notificação de mudança de status
     const [notificacao, setNotificacao] = useState<{ mensagem: string; tipo: 'info' | 'success' } | null>(null);
@@ -68,21 +69,72 @@ export default function ListaPropostas() {
         setPropostas(todasPropostas);
     };
 
-    const propostasFiltradas = propostas.filter(p => {
-        const matchStatus = filtroStatus === 'todas' || p.status === filtroStatus;
-
-        // Se não há busca, retornar apenas por status
-        if (!busca.trim()) {
-            return matchStatus;
+    const requestSort = (key: string) => {
+        let direction: 'asc' | 'desc' = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
         }
+        setSortConfig({ key, direction });
+    };
 
-        const buscaLower = busca.toLowerCase();
-        const matchBusca =
-            (typeof p.cliente?.empresa === 'string' && p.cliente.empresa.toLowerCase().includes(buscaLower)) ||
-            (typeof p.numero === 'string' && p.numero.toLowerCase().includes(buscaLower));
+    const propostasFiltradas = propostas
+        .filter(p => {
+            const matchStatus = filtroStatus === 'todas' || p.status === filtroStatus;
 
-        return matchStatus && matchBusca;
-    });
+            // Se não há busca, retornar apenas por status
+            if (!busca.trim()) {
+                return matchStatus;
+            }
+
+            const buscaLower = busca.toLowerCase();
+            const matchBusca =
+                (typeof p.cliente?.empresa === 'string' && p.cliente.empresa.toLowerCase().includes(buscaLower)) ||
+                (typeof p.numero === 'string' && p.numero.toLowerCase().includes(buscaLower));
+
+            return matchStatus && matchBusca;
+        })
+        .sort((a, b) => {
+            const { key, direction } = sortConfig;
+            let valueA: any = '';
+            let valueB: any = '';
+
+            switch (key) {
+                case 'numero':
+                    valueA = a.numero;
+                    valueB = b.numero;
+                    break;
+                case 'cliente':
+                    valueA = a.cliente?.empresa || '';
+                    valueB = b.cliente?.empresa || '';
+                    break;
+                case 'produto':
+                    valueA = a.produto?.nome || '';
+                    valueB = b.produto?.nome || '';
+                    break;
+                case 'valor':
+                    valueA = a.valores?.valorAvista || 0;
+                    valueB = b.valores?.valorAvista || 0;
+                    break;
+                case 'status':
+                    valueA = a.status;
+                    valueB = b.status;
+                    break;
+                case 'validade':
+                    valueA = new Date(a.dataValidade).getTime();
+                    valueB = new Date(b.dataValidade).getTime();
+                    break;
+                default:
+                    return 0;
+            }
+
+            if (valueA < valueB) {
+                return direction === 'asc' ? -1 : 1;
+            }
+            if (valueA > valueB) {
+                return direction === 'asc' ? 1 : -1;
+            }
+            return 0;
+        });
 
     const handleExcluir = (id: string) => {
         if (confirm('Deseja realmente excluir esta proposta?')) {
@@ -104,6 +156,37 @@ export default function ListaPropostas() {
         };
         return classes[status] || 'badge-rascunho';
     };
+
+    const renderSortIcon = (key: string) => {
+        if (sortConfig.key !== key) {
+            return (
+                <svg className="w-3 h-3 ml-1 text-gray-400 opacity-0 group-hover:opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                </svg>
+            );
+        }
+        return sortConfig.direction === 'asc' ? (
+            <svg className="w-3 h-3 ml-1 text-extrema-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+            </svg>
+        ) : (
+            <svg className="w-3 h-3 ml-1 text-extrema-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+        );
+    };
+
+    const SortableHeader = ({ label, sortKey }: { label: string, sortKey: string }) => (
+        <th
+            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer group hover:bg-gray-100 transition-colors select-none"
+            onClick={() => requestSort(sortKey)}
+        >
+            <div className="flex items-center">
+                {label}
+                {renderSortIcon(sortKey)}
+            </div>
+        </th>
+    );
 
     return (
         <div>
@@ -195,24 +278,12 @@ export default function ListaPropostas() {
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Número
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Cliente
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Produto
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Valor
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Status
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Validade
-                                    </th>
+                                    <SortableHeader label="Número" sortKey="numero" />
+                                    <SortableHeader label="Cliente" sortKey="cliente" />
+                                    <SortableHeader label="Produto" sortKey="produto" />
+                                    <SortableHeader label="Valor" sortKey="valor" />
+                                    <SortableHeader label="Status" sortKey="status" />
+                                    <SortableHeader label="Validade" sortKey="validade" />
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Ações
                                     </th>

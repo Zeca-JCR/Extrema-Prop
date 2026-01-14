@@ -228,3 +228,22 @@ export function validateFileSize(file: File, maxSizeMB: number): boolean {
 export function validateFileType(file: File, allowedTypes: string[]): boolean {
     return allowedTypes.includes(file.type);
 }
+
+// Gerar descrição automática de condições de pagamento
+export function gerarDescricaoCondicoes(
+    investimentoInicial: number,
+    qtdParcelas: number,
+    valorParcela: number,
+    mensalidade: number
+): string {
+    const valorInvestimentoFormatado = formatCurrency(investimentoInicial);
+
+    // Caso 1: Pagamento à vista (0 ou 1 parcela)
+    if (qtdParcelas <= 1) {
+        return `Pagamento à vista de ${valorInvestimentoFormatado} via PIX na assinatura do contrato.\n\nMensalidade de ${formatCurrency(mensalidade)} iniciada após 30 dias.`;
+    }
+
+    // Caso 2: Parcelado
+    const valorParcelaFormatado = formatCurrency(valorParcela);
+    return `Entrada via PIX + ${qtdParcelas} boletos de ${valorParcelaFormatado} (30, 60${qtdParcelas > 2 ? '...' : ''} dias).\nTotalizando ${valorInvestimentoFormatado}.\n\nMensalidade de ${formatCurrency(mensalidade)} iniciada após 30 dias da assinatura.`;
+}
