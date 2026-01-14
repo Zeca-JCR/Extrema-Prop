@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/auth-context';
 import { getPropostas, deleteProposta } from '@/lib/storage';
 import type { Proposta } from '@/lib/storage';
 import { formatDate, formatCurrency, getStatusLabel, diasRestantes } from '@/lib/utils';
+import DetalhesPropostaModal from '@/components/admin/DetalhesPropostaModal';
 
 export default function ListaPropostas() {
     const router = useRouter();
@@ -13,6 +14,7 @@ export default function ListaPropostas() {
     const [propostas, setPropostas] = useState<Proposta[]>([]);
     const [filtroStatus, setFiltroStatus] = useState('todas');
     const [busca, setBusca] = useState('');
+    const [propostaSelecionada, setPropostaSelecionada] = useState<Proposta | null>(null);
 
     useEffect(() => {
         carregarPropostas();
@@ -201,9 +203,9 @@ export default function ListaPropostas() {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm">
                                                 <div className="flex items-center space-x-2">
                                                     <button
-                                                        onClick={() => window.open(`/proposta/${proposta.hashPublico}`, '_blank')}
+                                                        onClick={() => setPropostaSelecionada(proposta)}
                                                         className="text-extrema-purple hover:text-extrema-purple-600"
-                                                        title="Ver detalhes"
+                                                        title="Ver detalhes e comprovante"
                                                     >
                                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -253,6 +255,13 @@ export default function ListaPropostas() {
                         </table>
                     </div>
                 </div>
+            )}
+            {propostaSelecionada && (
+                <DetalhesPropostaModal
+                    proposta={propostaSelecionada}
+                    onClose={() => setPropostaSelecionada(null)}
+                    onUpdate={carregarPropostas}
+                />
             )}
         </div>
     );

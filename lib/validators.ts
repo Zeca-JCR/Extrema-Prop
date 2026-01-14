@@ -169,7 +169,112 @@ export interface ErrosValidacao {
     message: string;
 }
 
-export function validarDadosCadastrais(dados: {
+// Interface para os dados do formulário de aceite
+export interface DadosCadastraisForm {
+    tipoPessoa: 'juridica' | 'fisica';
+    cnpj?: string;
+    razaoSocial?: string;
+    nomeFantasia?: string;
+    inscricaoEstadual?: string;
+    regimeTributario?: string;
+
+    // Endereço
+    endereco?: string;
+    numero?: string;
+    complemento?: string;
+    bairro?: string;
+    cep?: string;
+    cidade?: string;
+    estado?: string;
+
+    // Responsável
+    responsavelNome?: string;
+    responsavelCargo?: string;
+    responsavelCpf?: string;
+
+    // Contato da Empresa
+    email?: string;
+    telefone?: string;
+
+    // Contabilidade
+    contabilidadeNome?: string;
+    contabilidadeContato?: string;
+    contabilidadeTelefone?: string;
+
+    observacoes?: string;
+    aceitouTermos?: boolean;
+}
+
+// Validação para o formulário de aceite - retorna objeto com erros
+export function validarDadosCadastrais(dados: DadosCadastraisForm): Record<string, string> {
+    const erros: Record<string, string> = {};
+
+    // Validações principais (Pessoa Jurídica)
+    if (!dados.cnpj || dados.cnpj.trim() === '') {
+        erros.cnpj = 'CNPJ é obrigatório';
+    } else if (!validarCNPJ(dados.cnpj)) {
+        erros.cnpj = 'CNPJ inválido';
+    }
+
+    if (!dados.razaoSocial || dados.razaoSocial.trim().length < 3) {
+        erros.razaoSocial = 'Razão Social deve ter pelo menos 3 caracteres';
+    }
+
+    if (!dados.nomeFantasia || dados.nomeFantasia.trim().length < 2) {
+        erros.nomeFantasia = 'Nome Fantasia é obrigatório';
+    }
+
+    // Validações de Endereço
+    if (!dados.cep || dados.cep.trim() === '') {
+        erros.cep = 'CEP é obrigatório';
+    } else if (!validarCEP(dados.cep)) {
+        erros.cep = 'CEP inválido';
+    }
+
+    if (!dados.endereco || dados.endereco.trim() === '') erros.endereco = 'Endereço é obrigatório';
+    if (!dados.numero || dados.numero.trim() === '') erros.numero = 'Número é obrigatório';
+    if (!dados.bairro || dados.bairro.trim() === '') erros.bairro = 'Bairro é obrigatório';
+    if (!dados.cidade || dados.cidade.trim() === '') erros.cidade = 'Cidade é obrigatória';
+    if (!dados.estado || dados.estado.trim() === '') erros.estado = 'Estado é obrigatório';
+
+    // Responsável
+    if (!dados.responsavelNome || dados.responsavelNome.trim() === '') erros.responsavelNome = 'Nome do responsável é obrigatório';
+    if (!dados.responsavelCargo || dados.responsavelCargo.trim() === '') erros.responsavelCargo = 'Cargo do responsável é obrigatório';
+
+    if (!dados.responsavelCpf || dados.responsavelCpf.trim() === '') {
+        erros.responsavelCpf = 'CPF do responsável é obrigatório';
+    } else if (!validarCPF(dados.responsavelCpf)) {
+        erros.responsavelCpf = 'CPF inválido';
+    }
+
+    // Contato
+    if (!dados.email || dados.email.trim() === '') {
+        erros.email = 'Email é obrigatório';
+    } else if (!validarEmail(dados.email)) {
+        erros.email = 'Email inválido';
+    }
+
+    if (!dados.telefone || dados.telefone.trim() === '') {
+        erros.telefone = 'Telefone é obrigatório';
+    } else if (!validarTelefone(dados.telefone)) {
+        erros.telefone = 'Telefone inválido';
+    }
+
+    // Contabilidade
+    if (!dados.contabilidadeNome || dados.contabilidadeNome.trim() === '') erros.contabilidadeNome = 'Nome da contabilidade é obrigatório';
+    if (!dados.contabilidadeContato || dados.contabilidadeContato.trim() === '') erros.contabilidadeContato = 'Pessoa de contato da contabilidade é obrigatória';
+    if (!dados.contabilidadeTelefone || dados.contabilidadeTelefone.trim() === '') erros.contabilidadeTelefone = 'Telefone da contabilidade é obrigatório';
+
+    // Termos
+    if (dados.aceitouTermos === false) {
+        erros.termos = 'Você deve aceitar os termos da proposta';
+    }
+
+    return erros;
+}
+
+// Função legada para manter compatibilidade
+export function validarDadosCadastraisLegacy(dados: {
     razaoSocial?: string;
     cnpj?: string;
     email?: string;

@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { getPropostaByHash, updateProposta } from '@/lib/storage';
 import { formatDate, formatCurrency, diasRestantes, isPropostaExpirada } from '@/lib/utils';
+import { gerarPDFProposta } from '@/lib/pdf';
 import type { Proposta } from '@/lib/storage';
 import Image from 'next/image';
+import AceiteForm from '@/components/public/AceiteForm';
 
 export default function PropostaPublica() {
     const params = useParams();
@@ -13,23 +15,48 @@ export default function PropostaPublica() {
     const [proposta, setProposta] = useState<Proposta | null>(null);
     const [loading, setLoading] = useState(true);
     const [expirada, setExpirada] = useState(false);
+    const [showAceiteModal, setShowAceiteModal] = useState(false);
+    const [gerandoPDF, setGerandoPDF] = useState(false);
 
     useEffect(() => {
         if (hash) {
-            const prop = getPropostaByHash(hash);
-            setProposta(prop);
+            const fetchProposta = () => {
+                const prop = getPropostaByHash(hash);
+                if (prop) {
+                    // Se o status mudou, atualiza
+                    setProposta(current => {
+                        if (current && current.status !== prop.status) {
+                            return prop;
+                        }
+                        return current || prop;
+                    });
 
-            if (prop) {
-                setExpirada(isPropostaExpirada(prop.dataValidade));
-            }
+                    setExpirada(isPropostaExpirada(prop.dataValidade));
+                }
+                setLoading(false);
+            };
 
-            setLoading(false);
+            fetchProposta();
+
+            // Polling para atualização em tempo real (ex: pagamento em outra aba)
+            const interval = setInterval(fetchProposta, 3000);
+
+            return () => clearInterval(interval);
         }
     }, [hash]);
 
-    const handleBaixarPDF = () => {
-        // TODO: Implementar geração de PDF
-        alert('Geração de PDF será implementada em breve!');
+    const handleBaixarPDF = async (comAceite: boolean = false) => {
+        if (!proposta) return;
+
+        setGerandoPDF(true);
+        try {
+            await gerarPDFProposta(proposta, { comAceite });
+        } catch (error) {
+            console.error('Erro ao gerar PDF:', error);
+            alert('Erro ao gerar PDF. Tente novamente.');
+        } finally {
+            setGerandoPDF(false);
+        }
     };
 
     const handleRecusar = () => {
@@ -49,6 +76,10 @@ export default function PropostaPublica() {
             setProposta(propostaAtualizada);
             alert('Proposta recusada com sucesso. Entraremos em contato em breve.');
         }
+    };
+
+    const handleAceiteSuccess = (propostaAtualizada: Proposta) => {
+        setProposta(propostaAtualizada);
     };
 
     if (loading) {
@@ -80,6 +111,7 @@ export default function PropostaPublica() {
     }
 
     const diasRest = diasRestantes(proposta.dataValidade);
+    const podeAceitar = !expirada && proposta.status !== 'recusada' && proposta.status !== 'aceita' && proposta.status !== 'comprovante_enviado' && proposta.status !== 'paga';
 
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4">
@@ -111,6 +143,39 @@ export default function PropostaPublica() {
                     </div>
                 </div>
 
+                {/* Alerta de Status Especial */}
+                {proposta.status === 'comprovante_enviado' && (
+                    <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 mb-6">
+                        <div className="flex items-start space-x-3">
+                            <svg className="w-6 h-6 text-purple-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                                <h3 className="text-sm font-semibold text-purple-900">Proposta Aceita - Aguardando Confirmação</h3>
+                                <p className="text-sm text-purple-700 mt-1">
+                                    Recebemos seu comprovante de pagamento. Nossa equipe está verificando e entrará em contato em breve.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {proposta.status === 'paga' && (
+                    <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
+                        <div className="flex items-start space-x-3">
+                            <svg className="w-6 h-6 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            <div>
+                                <h3 className="text-sm font-semibold text-green-900">Pagamento Confirmado! ✓</h3>
+                                <p className="text-sm text-green-700 mt-1">
+                                    Seu pagamento foi confirmado. Em breve você receberá o contrato para assinatura.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Alerta de Expiração */}
                 {expirada && (
                     <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
@@ -123,6 +188,23 @@ export default function PropostaPublica() {
                                 <p className="text-sm text-red-700 mt-1">
                                     Esta proposta expirou em {formatDate(proposta.dataValidade, 'long')}.
                                     Entre em contato conosco para solicitar uma nova proposta.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Alerta de Recusada */}
+                {proposta.status === 'recusada' && (
+                    <div className="bg-gray-100 border border-gray-300 rounded-xl p-4 mb-6">
+                        <div className="flex items-start space-x-3">
+                            <svg className="w-6 h-6 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            <div>
+                                <h3 className="text-sm font-semibold text-gray-900">Proposta Recusada</h3>
+                                <p className="text-sm text-gray-700 mt-1">
+                                    Esta proposta foi recusada. Se mudar de ideia, entre em contato conosco.
                                 </p>
                             </div>
                         </div>
@@ -239,26 +321,70 @@ export default function PropostaPublica() {
                 </div>
 
                 {/* Ações */}
-                {!expirada && proposta.status !== 'recusada' && proposta.status !== 'aceita' && (
+                {podeAceitar && (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         <button
-                            onClick={() => alert('Modal de aceite em desenvolvimento! Por enquanto, use o formulário de contato.')}
+                            onClick={() => setShowAceiteModal(true)}
                             className="btn btn-primary py-4 text-base"
                         >
                             ✓ Aceitar Proposta
                         </button>
-                        <button
-                            onClick={handleBaixarPDF}
-                            className="btn btn-outline py-4 text-base"
-                        >
-                            📄 Baixar PDF
-                        </button>
+                        <div className="relative group">
+                            <button
+                                className="btn btn-outline py-4 text-base disabled:opacity-50 w-full flex items-center justify-center space-x-2"
+                                disabled={gerandoPDF}
+                            >
+                                <span>📄 Baixar PDF</span>
+                                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            {/* Dropdown Menu */}
+                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 hidden group-hover:block border border-gray-100">
+                                <button
+                                    onClick={() => handleBaixarPDF(false)}
+                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                >
+                                    Proposta Original
+                                </button>
+                                {proposta.aceite && (
+                                    <button
+                                        onClick={() => handleBaixarPDF(true)}
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                    >
+                                        Proposta com Aceite
+                                    </button>
+                                )}
+                            </div>
+                        </div>
                         <button
                             onClick={handleRecusar}
                             className="btn btn-ghost py-4 text-base text-red-600 hover:bg-red-50"
                         >
                             ✗ Recusar
                         </button>
+                    </div>
+                )}
+
+                {/* Botão PDF quando não pode aceitar */}
+                {!podeAceitar && (
+                    <div className="flex justify-center mb-6">
+                        <button
+                            onClick={() => handleBaixarPDF(false)}
+                            disabled={gerandoPDF}
+                            className="btn btn-outline py-3 px-8 disabled:opacity-50"
+                        >
+                            {gerandoPDF ? '⏳ Gerando...' : '📄 Baixar PDF da Proposta'}
+                        </button>
+                        {proposta.aceite && (
+                            <button
+                                onClick={() => handleBaixarPDF(true)}
+                                disabled={gerandoPDF}
+                                className="btn btn-outline py-3 px-8 ml-4 disabled:opacity-50"
+                            >
+                                {gerandoPDF ? '⏳...' : '📄 Baixar Comprovante/Aceite'}
+                            </button>
+                        )}
                     </div>
                 )}
 
@@ -282,6 +408,15 @@ export default function PropostaPublica() {
                     <p className="mt-1">São Bento do Sul-SC | Balneário Piçarras-SC</p>
                 </div>
             </div>
+
+            {/* Modal de Aceite */}
+            {showAceiteModal && proposta && (
+                <AceiteForm
+                    proposta={proposta}
+                    onClose={() => setShowAceiteModal(false)}
+                    onSuccess={handleAceiteSuccess}
+                />
+            )}
         </div>
     );
 }

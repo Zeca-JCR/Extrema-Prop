@@ -111,6 +111,9 @@ export interface Proposta {
     // Dados da Proposta
     produto: Produto;
 
+    // Rascunho dos dados cadastrais (para fluxo de preenchimento parcial)
+    dadosCadastrais?: DadosCadastrais;
+
     // Valores
     valores: Valores;
 
