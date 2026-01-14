@@ -16,6 +16,7 @@ export default function PropostaPublica() {
     const [loading, setLoading] = useState(true);
     const [expirada, setExpirada] = useState(false);
     const [showAceiteModal, setShowAceiteModal] = useState(false);
+    const [showPdfMenu, setShowPdfMenu] = useState(false);
     const [gerandoPDF, setGerandoPDF] = useState(false);
 
     useEffect(() => {
@@ -329,33 +330,51 @@ export default function PropostaPublica() {
                         >
                             ✓ Aceitar Proposta
                         </button>
-                        <div className="relative group">
+                        <div className="relative">
                             <button
+                                onClick={() => setShowPdfMenu(!showPdfMenu)}
                                 className="btn btn-outline py-4 text-base disabled:opacity-50 w-full flex items-center justify-center space-x-2"
                                 disabled={gerandoPDF}
                             >
                                 <span>📄 Baixar PDF</span>
-                                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className={`w-4 h-4 ml-1 transition-transform ${showPdfMenu ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
+
+                            {/* Backdrop para fechar ao clicar fora */}
+                            {showPdfMenu && (
+                                <div
+                                    className="fixed inset-0 z-10"
+                                    onClick={() => setShowPdfMenu(false)}
+                                />
+                            )}
+
                             {/* Dropdown Menu */}
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 hidden group-hover:block border border-gray-100">
-                                <button
-                                    onClick={() => handleBaixarPDF(false)}
-                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                >
-                                    Proposta Original
-                                </button>
-                                {proposta.aceite && (
+                            {showPdfMenu && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 border border-gray-100">
                                     <button
-                                        onClick={() => handleBaixarPDF(true)}
+                                        onClick={() => {
+                                            handleBaixarPDF(false);
+                                            setShowPdfMenu(false);
+                                        }}
                                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                     >
-                                        Proposta com Aceite
+                                        Proposta Original
                                     </button>
-                                )}
-                            </div>
+                                    {proposta.aceite && (
+                                        <button
+                                            onClick={() => {
+                                                handleBaixarPDF(true);
+                                                setShowPdfMenu(false);
+                                            }}
+                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        >
+                                            Proposta com Aceite
+                                        </button>
+                                    )}
+                                </div>
+                            )}
                         </div>
                         <button
                             onClick={handleRecusar}

@@ -17,6 +17,29 @@ interface AceiteFormProps {
 
 type Etapa = 'dados' | 'pagamento' | 'pix' | 'comprovante' | 'sucesso';
 
+const MOCK_DATA = {
+    cnpj: '33.649.575/0001-99',
+    razaoSocial: 'Empresa de Teste Automatizado Ltda',
+    nomeFantasia: 'Teste Auto',
+    endereco: 'Av. Paulista',
+    numero: '1000',
+    bairro: 'Bela Vista',
+    complemento: 'Andar 10',
+    cep: '01310-100',
+    cidade: 'São Paulo',
+    estado: 'SP',
+    inscricaoEstadual: 'Isento',
+    regimeTributario: 'Simples Nacional',
+    responsavelNome: 'João da Silva Teste',
+    responsavelCargo: 'Diretor Financeiro',
+    responsavelCpf: '003.364.979-03',
+    telefone: '(11) 98888-8888',
+    email: 'teste@exemplo.com.br',
+    contabilidadeNome: 'Contabilidade Modelo',
+    contabilidadeContato: 'Maria Contadora',
+    contabilidadeTelefone: '(11) 3333-3333',
+};
+
 export default function AceiteForm({ proposta, onClose, onSuccess }: AceiteFormProps) {
     const [etapa, setEtapa] = useState<Etapa>('dados');
     const [formaPagamento, setFormaPagamento] = useState<'avista' | 'parcelado' | null>(null);
@@ -99,9 +122,12 @@ export default function AceiteForm({ proposta, onClose, onSuccess }: AceiteFormP
                 setContabilidadeTelefone(d.contabilidade.telefone || '');
             }
 
-            // Se já tem dados e status é aguardando_pagamento (ou superior), pula etapa 1
-            const statusComProgresso = ['aguardando_pagamento', 'comprovante_enviado', 'paga', 'aceita', 'recusada'];
-            if (statusComProgresso.includes(proposta.status)) {
+            // Sincronização de Status em Tempo Real
+            // Se a proposta foi concluída (por outra pessoa), vai para sucesso
+            if (['comprovante_enviado', 'paga', 'aceita'].includes(proposta.status)) {
+                setEtapa('sucesso');
+            } else if (proposta.status === 'aguardando_pagamento') {
+                // Se já tem dados e status é aguardando_pagamento, pula etapa 1
                 setEtapa(prev => prev === 'dados' ? 'pagamento' : prev);
             }
         }
@@ -149,6 +175,39 @@ export default function AceiteForm({ proposta, onClose, onSuccess }: AceiteFormP
 
     const [erros, setErros] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(false);
+
+    const handleAutofill = () => {
+        setCnpj(MOCK_DATA.cnpj);
+        setRazaoSocial(MOCK_DATA.razaoSocial);
+        setNomeFantasia(MOCK_DATA.nomeFantasia);
+        setEndereco(MOCK_DATA.endereco);
+        setNumero(MOCK_DATA.numero);
+        setBairro(MOCK_DATA.bairro);
+        setComplemento(MOCK_DATA.complemento);
+        setCep(MOCK_DATA.cep);
+        setCidade(MOCK_DATA.cidade);
+        setEstado(MOCK_DATA.estado);
+        setInscricaoEstadual(MOCK_DATA.inscricaoEstadual);
+        setRegimeTributario(MOCK_DATA.regimeTributario);
+
+        setResponsavelNome(MOCK_DATA.responsavelNome);
+        setResponsavelCargo(MOCK_DATA.responsavelCargo);
+        setResponsavelCpf(MOCK_DATA.responsavelCpf);
+
+        setTelefone(MOCK_DATA.telefone);
+        setEmail(MOCK_DATA.email);
+
+        setContabilidadeNome(MOCK_DATA.contabilidadeNome);
+        setContabilidadeContato(MOCK_DATA.contabilidadeContato);
+        setContabilidadeTelefone(MOCK_DATA.contabilidadeTelefone);
+
+        setAceitouTermos(true);
+
+        // Forçar validação visual
+        setCnpjValido(true);
+        setCpfValido(true);
+        setErros({});
+    };
 
     const fetchCnpjData = async (cnpjNumeros: string) => {
         setIsFetchingCnpj(true);
@@ -489,7 +548,18 @@ export default function AceiteForm({ proposta, onClose, onSuccess }: AceiteFormP
                 <div className="bg-gradient-extrema p-6 rounded-t-xl text-white sticky top-0 z-10">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h2 className="text-2xl font-bold">Aceitar Proposta</h2>
+                            <h2 className="text-2xl font-bold flex items-center gap-2">
+                                Aceitar Proposta
+                                {etapa === 'dados' && (
+                                    <button
+                                        onClick={handleAutofill}
+                                        className="bg-white/20 hover:bg-white/30 text-white px-2 py-1 rounded text-xs transition-colors"
+                                        title="Preencher com dados fictícios"
+                                    >
+                                        🪄
+                                    </button>
+                                )}
+                            </h2>
                             <p className="text-white/90 text-sm mt-1">
                                 {etapa === 'dados' && 'Passo 1: Dados Cadastrais'}
                                 {etapa === 'pagamento' && 'Passo 2: Forma de Pagamento'}

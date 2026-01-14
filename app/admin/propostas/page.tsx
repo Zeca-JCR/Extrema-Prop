@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { getPropostas, deleteProposta } from '@/lib/storage';
@@ -16,8 +16,40 @@ export default function ListaPropostas() {
     const [busca, setBusca] = useState('');
     const [propostaSelecionada, setPropostaSelecionada] = useState<Proposta | null>(null);
 
+    // Notificação de mudança de status
+    const [notificacao, setNotificacao] = useState<{ mensagem: string; tipo: 'info' | 'success' } | null>(null);
+    const statusAnteriorRef = useRef<Record<string, string>>({});
+
     useEffect(() => {
         carregarPropostas();
+
+        // Polling para detectar mudanças de status
+        const interval = setInterval(() => {
+            const novasPropostas = getPropostas();
+            let mudancas: string[] = [];
+
+            novasPropostas.forEach(p => {
+                const statusAnterior = statusAnteriorRef.current[p.id];
+                if (statusAnterior && statusAnterior !== p.status) {
+                    const label = getStatusLabel(p.status);
+                    mudancas.push(`${p.numero}: ${label}`);
+                }
+                statusAnteriorRef.current[p.id] = p.status;
+            });
+
+            if (mudancas.length > 0) {
+                setNotificacao({
+                    mensagem: `Status atualizado: ${mudancas.join(', ')}`,
+                    tipo: 'success'
+                });
+                carregarPropostas();
+
+                // Auto-fechar após 5 segundos
+                setTimeout(() => setNotificacao(null), 5000);
+            }
+        }, 3000);
+
+        return () => clearInterval(interval);
     }, [user]);
 
     const carregarPropostas = () => {
@@ -27,6 +59,11 @@ export default function ListaPropostas() {
         if (user?.role === 'vendedor') {
             todasPropostas = todasPropostas.filter(p => p.vendedorId === user.id);
         }
+
+        // Atualizar referência de status
+        todasPropostas.forEach(p => {
+            statusAnteriorRef.current[p.id] = p.status;
+        });
 
         setPropostas(todasPropostas);
     };
@@ -70,6 +107,23 @@ export default function ListaPropostas() {
 
     return (
         <div>
+            {/* Banner de Notificação */}
+            {notificacao && (
+                <div className={`mb-4 p-4 rounded-lg flex items-center justify-between ${notificacao.tipo === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-blue-50 border border-blue-200 text-blue-800'}`}>
+                    <div className="flex items-center space-x-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="font-medium">{notificacao.mensagem}</span>
+                    </div>
+                    <button onClick={() => setNotificacao(null)} className="text-current hover:opacity-70">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            )}
+
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">Propostas</h1>
