@@ -25,6 +25,7 @@ export interface Produto {
         qtdCnpjs: number;
         qtdUsuarios: number;
     };
+    qtdAgendasPresenciais?: number; // Nova: Quantidade de agendas presenciais incluídas
 }
 
 export interface Valores {
@@ -177,15 +178,10 @@ export interface Configuracoes {
             keyPath: string;  // Caminho no servidor
         }
     };
-    secoesProposta: {
-        introducao: string;
-        visao: string;
-        missao: string;
-        negocio: string;
-        vantagensTitulo: string;
-        experiencia: string;
-        consultores: string;
-        suporte: string;
+
+    textosProposta: {
+        introducao: string;      // Texto de introdução personalizável
+        rodapeMensalidade: string; // Texto legal do rodapé da mensalidade
     };
     numeroPropostaAtual: number;
 }
@@ -348,15 +344,10 @@ export const getConfiguracoes = (): Configuracoes => {
                 keyPath: '',
             }
         },
-        secoesProposta: {
-            introducao: 'A mais de 12 anos trabalhando com software de Gestão e Automação Comercial.',
-            visao: 'Ser a empresa de soluções de tecnologia da informação para pequenas, médias e grandes empresas mais competitiva do mercado e referência por sua credibilidade e tecnologia em produtos e serviços.',
-            missao: 'Ajudar pequenas, medias e grandes empresas a ter sucesso por meio da gestão da informação, fazendo uso de tecnologia de ponta e inovadora.',
-            negocio: 'Fornecer softwares para controle e gerenciamento das atividades de negócios dos seus clientes.\\nValores, Ética, Inovação, Conhecimento, Qualidade, Comprometimento, Resultados.',
-            vantagensTitulo: 'Quais as vantagens – Por que devo confiar na Extrema!',
-            experiencia: 'Mais de 12 anos de experiência com Softwares de Gestão;\\n• Atua no fornecimento de Sistema para gestão comercial;\\n• Amplo conhecimento em Automação Comercial.',
-            consultores: 'A equipe é formada especialistas nas áreas administrativas, contábeis e tributárias.',
-            suporte: 'Trabalhamos com tecnologia de ponta para atender aos chamados de suporte técnico através:\\n➢ WhatsApp\\n➢ Acesso remoto (Acessamos sua base através da Internet);\\n➢ Telefone;\\n➢ In loco.'
+
+        textosProposta: {
+            introducao: 'É com grande satisfação que apresentamos esta proposta comercial para sua empresa. A Extrema Tecnologia atua há mais de 12 anos com software de Gestão e Automação Comercial, oferecendo soluções inteligentes para seus negócios.',
+            rodapeMensalidade: 'A mensalidade concede direito às atualizações de versão do sistema (regras de negócio, alterações legais/legislação) e suporte técnico via telefone, e-mail e WhatsApp. Este valor é reajustado anualmente pelo IGP-M ou por outro índice que venha a substituí-lo.'
         },
         numeroPropostaAtual: 1,
     };
@@ -375,9 +366,9 @@ export const getConfiguracoes = (): Configuracoes => {
                 ...(stored.integracoes?.ailos || {})
             }
         },
-        secoesProposta: {
-            ...defaultSettings.secoesProposta,
-            ...(stored.secoesProposta || {})
+        textosProposta: {
+            ...defaultSettings.textosProposta,
+            ...(stored.textosProposta || {})
         }
     };
 };

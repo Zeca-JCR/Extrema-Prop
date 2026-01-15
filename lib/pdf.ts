@@ -60,70 +60,7 @@ export async function gerarPDFProposta(proposta: Proposta, options?: { comAceite
 
         yPos = 55;
 
-        // ==================== INSTITUCIONAL (SEÇÕES FIXAS) ====================
-        if (config.secoesProposta) {
-            // Introdução
-            if (config.secoesProposta.introducao) {
-                doc.setTextColor(...COLORS.black);
-                doc.setFontSize(10);
-                doc.setFont('helvetica', 'normal');
-                const introLines = doc.splitTextToSize(config.secoesProposta.introducao, pageWidth - 2 * margin);
-                doc.text(introLines, margin, yPos);
-                yPos += introLines.length * 5 + 5;
-            }
 
-            // Visão, Missão, Negócio (Grid)
-            const colWidth = (pageWidth - 2 * margin) / 3 - 5;
-            let maxH = 0;
-
-            // Visão
-            if (config.secoesProposta.visao) {
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(...COLORS.purple);
-                doc.text('Visão', margin, yPos);
-
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(...COLORS.gray);
-                doc.setFontSize(8);
-                const lines = doc.splitTextToSize(config.secoesProposta.visao, colWidth);
-                doc.text(lines, margin, yPos + 5);
-                maxH = Math.max(maxH, lines.length * 4);
-            }
-
-            // Missão
-            if (config.secoesProposta.missao) {
-                const x = margin + colWidth + 5;
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(...COLORS.purple);
-                doc.setFontSize(10);
-                doc.text('Missão', x, yPos);
-
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(...COLORS.gray);
-                doc.setFontSize(8);
-                const lines = doc.splitTextToSize(config.secoesProposta.missao, colWidth);
-                doc.text(lines, x, yPos + 5);
-                maxH = Math.max(maxH, lines.length * 4);
-            }
-
-            // Negócio
-            if (config.secoesProposta.negocio) {
-                const x = margin + 2 * (colWidth + 5);
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(...COLORS.purple);
-                doc.setFontSize(10);
-                doc.text('Negócio', x, yPos);
-
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(...COLORS.gray);
-                doc.setFontSize(8);
-                const lines = doc.splitTextToSize(config.secoesProposta.negocio, colWidth);
-                doc.text(lines, x, yPos + 5);
-                maxH = Math.max(maxH, lines.length * 4);
-            }
-
-            if (maxH > 0) yPos += maxH + 15;
-        }
 
         // ==================== DADOS DA EMPRESA (EXTREMA) ====================
         doc.setTextColor(...COLORS.gray);
@@ -413,63 +350,7 @@ export async function gerarPDFProposta(proposta: Proposta, options?: { comAceite
         yPos += condicoesLines.length * 5 + 15;
 
         // ==================== APOIO E SUPORTE (SEÇÕES FIXAS FINAIS) ====================
-        if (config.secoesProposta) {
-            // Quebra de página se necessário
-            if (yPos > pageHeight - 80) {
-                doc.addPage();
-                yPos = 20;
-            }
 
-            // Título Vantagens
-            doc.setTextColor(...COLORS.purple);
-            doc.setFontSize(14);
-            doc.setFont('helvetica', 'bold');
-            const titulo = config.secoesProposta.vantagensTitulo || 'Quais as vantagens – Por que devo confiar na Extrema!';
-            doc.text(titulo, margin, yPos);
-            yPos += 10;
-
-            doc.setFontSize(9);
-
-            // Experiência
-            if (config.secoesProposta.experiencia) {
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(...COLORS.black);
-                doc.text('Experiência:', margin, yPos);
-
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(...COLORS.gray);
-                const lines = doc.splitTextToSize(config.secoesProposta.experiencia, pageWidth - 2 * margin - 10);
-                doc.text(lines, margin + 20, yPos);
-                yPos += lines.length * 4 + 6;
-            }
-
-            // Consultores
-            if (config.secoesProposta.consultores) {
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(...COLORS.black);
-                doc.text('Consultores:', margin, yPos);
-
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(...COLORS.gray);
-                const lines = doc.splitTextToSize(config.secoesProposta.consultores, pageWidth - 2 * margin - 10);
-                doc.text(lines, margin + 20, yPos);
-                yPos += lines.length * 4 + 6;
-            }
-
-            // Suporte
-            if (config.secoesProposta.suporte) {
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(...COLORS.black);
-                doc.text('Help-Desk:', margin, yPos);
-
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(...COLORS.gray);
-                const lines = doc.splitTextToSize(config.secoesProposta.suporte, pageWidth - 2 * margin - 10);
-                doc.text(lines, margin + 20, yPos);
-                yPos += lines.length * 4 + 6;
-            }
-            yPos += 10;
-        }
 
         // ==================== DADOS DO ACEITE & COMPROVANTE ====================
         if (options?.comAceite && proposta.aceite) {

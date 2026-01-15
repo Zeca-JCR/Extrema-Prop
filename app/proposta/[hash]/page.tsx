@@ -121,7 +121,7 @@ export default function PropostaPublica() {
 
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-2xl mx-auto">
                 {/* Header com Logo */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
                     <div className="flex items-center justify-between">
@@ -150,35 +150,14 @@ export default function PropostaPublica() {
                 </div>
             </div>
 
-            {/* Seção Institucional (Intro, Visão, Missão, Negócio) */}
-            {config?.secoesProposta && (
-                <div className="card p-6 mb-6">
-                    {config.secoesProposta.introducao && (
-                        <p className="text-gray-700 mb-6 font-medium border-b pb-4">
-                            {config.secoesProposta.introducao}
-                        </p>
-                    )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {config.secoesProposta.visao && (
-                            <div>
-                                <h3 className="text-extrema-purple font-bold text-lg mb-2">Visão</h3>
-                                <p className="text-sm text-gray-600">{config.secoesProposta.visao}</p>
-                            </div>
-                        )}
-                        {config.secoesProposta.missao && (
-                            <div>
-                                <h3 className="text-extrema-purple font-bold text-lg mb-2">Missão</h3>
-                                <p className="text-sm text-gray-600">{config.secoesProposta.missao}</p>
-                            </div>
-                        )}
-                        {config.secoesProposta.negocio && (
-                            <div>
-                                <h3 className="text-extrema-purple font-bold text-lg mb-2">Negócio</h3>
-                                <p className="text-sm text-gray-600 whitespace-pre-line">{config.secoesProposta.negocio}</p>
-                            </div>
-                        )}
-                    </div>
+
+            {/* Seção de Introdução */}
+            {config?.textosProposta?.introducao && (
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-1">Prezado(a), {proposta.cliente.contato}</h2>
+                    <p className="text-sm text-gray-600 mb-4">{proposta.cliente.empresa}</p>
+                    <p className="text-gray-700 whitespace-pre-line">{config.textosProposta.introducao}</p>
                 </div>
             )}
 
@@ -315,6 +294,11 @@ export default function PropostaPublica() {
                             </div>
                         </div>
                     </div>
+                    {proposta.produto.qtdAgendasPresenciais && proposta.produto.qtdAgendasPresenciais > 0 && (
+                        <p className="text-xs text-gray-600 mt-3">
+                            ✓ Inclui {proposta.produto.qtdAgendasPresenciais} agenda{proposta.produto.qtdAgendasPresenciais > 1 ? 's' : ''} presencial{proposta.produto.qtdAgendasPresenciais > 1 ? 'is' : ''}
+                        </p>
+                    )}
                 </div>
 
                 {/* Parcelado */}
@@ -342,7 +326,7 @@ export default function PropostaPublica() {
             </div>
 
             {/* Mensalidade */}
-            <div className="card p-6 mb-6 bg-gradient-extrema text-white">
+            <div className="card p-6 mb-6 gradient-extrema text-white">
                 <div className="flex items-center justify-between">
                     <div>
                         <p className="text-white/80 text-sm mb-1">Mensalidade Recorrente</p>
@@ -362,141 +346,118 @@ export default function PropostaPublica() {
                         <p className="text-xs text-white/80 whitespace-pre-line">{proposta.detalhesMensalidade}</p>
                     </div>
                 )}
+                {config?.textosProposta?.rodapeMensalidade && (
+                    <div className="mt-4 pt-4 border-t border-white/20">
+                        <p className="text-[10px] text-white/70 whitespace-pre-line">{config.textosProposta.rodapeMensalidade}</p>
+                    </div>
+                )}
             </div>
 
-            {/* Condições de Pagamento */}
+            {/* Condições de Pagamento - Investimento Inicial */}
             <div className="card p-6 mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Condições de Pagamento</h3>
-                <p className="text-gray-700 whitespace-pre-wrap">{proposta.condicoesPagamento}</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">💼 Condições - Investimento Inicial</h3>
                 <p className="text-gray-700 whitespace-pre-wrap">{proposta.condicoesPagamento}</p>
             </div>
 
-            {/* Seção de Apoio e Vantagens */}
-            {config?.secoesProposta && (
-                <div className="card p-6 mb-6">
-                    <div className="mb-8">
-                        <h3 className="text-extrema-purple font-bold text-xl mb-4">Apoio e Suporte Técnico</h3>
-                        {/* Placeholder para imagem se houver, ou apenas texto */}
-                        <div className="flex justify-center mb-6">
-                            {/* Aqui poderia ir a imagem ilustrativa se o usuário quiser upload no futuro */}
-                            {/* Por hora, renderizamos os textos */}
-                        </div>
-                    </div>
-
-                    <h3 className="text-extrema-purple font-bold text-lg mb-4">
-                        {config.secoesProposta.vantagensTitulo || 'Quais as vantagens – Por que devo confiar na Extrema!'}
-                    </h3>
-
-                    <div className="space-y-6">
-                        {config.secoesProposta.experiencia && (
-                            <div>
-                                <h4 className="font-bold text-gray-900 underline mb-2">Experiência:</h4>
-                                <p className="text-gray-700 whitespace-pre-line ml-4">{config.secoesProposta.experiencia}</p>
-                            </div>
-                        )}
-
-                        {config.secoesProposta.consultores && (
-                            <div>
-                                <h4 className="font-bold text-gray-900 underline mb-2">Consultores Técnicos:</h4>
-                                <p className="text-gray-700 whitespace-pre-line ml-4">{config.secoesProposta.consultores}</p>
-                            </div>
-                        )}
-
-                        {config.secoesProposta.suporte && (
-                            <div>
-                                <h4 className="font-bold text-gray-900 underline mb-2">Help – Desk – (Tire sua dúvida):</h4>
-                                <p className="text-gray-700 whitespace-pre-line ml-4">{config.secoesProposta.suporte}</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
+            {/* Condições de Pagamento - Mensalidade */}
+            <div className="card p-6 mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">📅 Condições - Mensalidade Recorrente</h3>
+                <ul className="space-y-2 text-gray-700">
+                    <li>• Cobrança mensal via boleto ou PIX</li>
+                    <li>• Início da cobrança: 30 dias após a assinatura</li>
+                    {proposta.reajuste && <li>• Reajuste: {proposta.reajuste}</li>}
+                </ul>
+            </div>
 
             {/* Ações */}
-            {podeAceitar && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <button
-                        onClick={() => setShowAceiteModal(true)}
-                        className="btn btn-primary py-4 text-base"
-                    >
-                        ✓ Aceitar Proposta
-                    </button>
-                    <div className="relative">
+            {
+                podeAceitar && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         <button
-                            onClick={() => setShowPdfMenu(!showPdfMenu)}
-                            className="btn btn-outline py-4 text-base disabled:opacity-50 w-full flex items-center justify-center space-x-2"
-                            disabled={gerandoPDF}
+                            onClick={() => setShowAceiteModal(true)}
+                            className="btn btn-primary py-4 text-base"
                         >
-                            <span>📄 Baixar PDF</span>
-                            <svg className={`w-4 h-4 ml-1 transition-transform ${showPdfMenu ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
+                            ✓ Aceitar Proposta
                         </button>
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowPdfMenu(!showPdfMenu)}
+                                className="btn btn-outline py-4 text-base disabled:opacity-50 w-full flex items-center justify-center space-x-2"
+                                disabled={gerandoPDF}
+                            >
+                                <span>📄 Baixar PDF</span>
+                                <svg className={`w-4 h-4 ml-1 transition-transform ${showPdfMenu ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
 
-                        {/* Backdrop para fechar ao clicar fora */}
-                        {showPdfMenu && (
-                            <div
-                                className="fixed inset-0 z-10"
-                                onClick={() => setShowPdfMenu(false)}
-                            />
-                        )}
+                            {/* Backdrop para fechar ao clicar fora */}
+                            {showPdfMenu && (
+                                <div
+                                    className="fixed inset-0 z-10"
+                                    onClick={() => setShowPdfMenu(false)}
+                                />
+                            )}
 
-                        {/* Dropdown Menu */}
-                        {showPdfMenu && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 border border-gray-100">
-                                <button
-                                    onClick={() => {
-                                        handleBaixarPDF(false);
-                                        setShowPdfMenu(false);
-                                    }}
-                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                >
-                                    Proposta Original
-                                </button>
-                                {proposta.aceite && (
+                            {/* Dropdown Menu */}
+                            {showPdfMenu && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 border border-gray-100">
                                     <button
                                         onClick={() => {
-                                            handleBaixarPDF(true);
+                                            handleBaixarPDF(false);
                                             setShowPdfMenu(false);
                                         }}
                                         className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                     >
-                                        Proposta com Aceite
+                                        Proposta Original
                                     </button>
-                                )}
-                            </div>
-                        )}
+                                    {proposta.aceite && (
+                                        <button
+                                            onClick={() => {
+                                                handleBaixarPDF(true);
+                                                setShowPdfMenu(false);
+                                            }}
+                                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        >
+                                            Proposta com Aceite
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                        <button
+                            onClick={handleRecusar}
+                            className="btn btn-ghost py-4 text-base text-red-600 hover:bg-red-50"
+                        >
+                            ✗ Recusar
+                        </button>
                     </div>
-                    <button
-                        onClick={handleRecusar}
-                        className="btn btn-ghost py-4 text-base text-red-600 hover:bg-red-50"
-                    >
-                        ✗ Recusar
-                    </button>
-                </div>
-            )}
+                )
+            }
 
             {/* Botão PDF quando não pode aceitar */}
-            {!podeAceitar && (
-                <div className="flex justify-center mb-6">
-                    <button
-                        onClick={() => handleBaixarPDF(false)}
-                        disabled={gerandoPDF}
-                        className="btn btn-outline py-3 px-8 disabled:opacity-50"
-                    >
-                        {gerandoPDF ? '⏳ Gerando...' : '📄 Baixar PDF da Proposta'}
-                    </button>
-                    {proposta.aceite && (
+            {
+                !podeAceitar && (
+                    <div className="flex justify-center mb-6">
                         <button
-                            onClick={() => handleBaixarPDF(true)}
+                            onClick={() => handleBaixarPDF(false)}
                             disabled={gerandoPDF}
-                            className="btn btn-outline py-3 px-8 ml-4 disabled:opacity-50"
+                            className="btn btn-outline py-3 px-8 disabled:opacity-50"
                         >
-                            {gerandoPDF ? '⏳...' : '📄 Baixar Comprovante/Aceite'}
+                            {gerandoPDF ? '⏳ Gerando...' : '📄 Baixar PDF da Proposta'}
                         </button>
-                    )}
-                </div>
-            )}
+                        {proposta.aceite && (
+                            <button
+                                onClick={() => handleBaixarPDF(true)}
+                                disabled={gerandoPDF}
+                                className="btn btn-outline py-3 px-8 ml-4 disabled:opacity-50"
+                            >
+                                {gerandoPDF ? '⏳...' : '📄 Baixar Comprovante/Aceite'}
+                            </button>
+                        )}
+                    </div>
+                )
+            }
 
             {/* Footer com Contato */}
             <div className="card p-6 text-center">
@@ -518,13 +479,15 @@ export default function PropostaPublica() {
                 <p className="mt-1">São Bento do Sul-SC | Balneário Piçarras-SC</p>
             </div>
             {/* Modal de Aceite */}
-            {showAceiteModal && proposta && (
-                <AceiteForm
-                    proposta={proposta}
-                    onClose={() => setShowAceiteModal(false)}
-                    onSuccess={handleAceiteSuccess}
-                />
-            )}
-        </div>
+            {
+                showAceiteModal && proposta && (
+                    <AceiteForm
+                        proposta={proposta}
+                        onClose={() => setShowAceiteModal(false)}
+                        onSuccess={handleAceiteSuccess}
+                    />
+                )
+            }
+        </div >
     );
 }

@@ -14,6 +14,12 @@ export default function TemplatesPage() {
     const [templates, setTemplates] = useState<Template[]>([]);
     const [mostrarForm, setMostrarForm] = useState(false);
     const [editando, setEditando] = useState<Template | null>(null);
+    const [notificacao, setNotificacao] = useState<{ mensagem: string; tipo: 'success' | 'error' } | null>(null);
+
+    const mostrarNotificacao = (mensagem: string, tipo: 'success' | 'error' = 'success') => {
+        setNotificacao({ mensagem, tipo });
+        setTimeout(() => setNotificacao(null), 3000);
+    };
 
     // Form fields
     const [nome, setNome] = useState('');
@@ -210,6 +216,7 @@ Obs.: Início da cobrança 30 dias após a assinatura da proposta.
         saveTemplate(template);
         carregarTemplates();
         limparForm();
+        mostrarNotificacao(`Template "${template.nome}" ${editando ? 'atualizado' : 'criado'} com sucesso!`);
     };
 
     const handleEditar = (template: Template) => {
@@ -238,6 +245,7 @@ Obs.: Início da cobrança 30 dias após a assinatura da proposta.
         if (confirm('Tem certeza que deseja excluir este template?')) {
             deleteTemplate(id);
             carregarTemplates();
+            mostrarNotificacao('Template excluído com sucesso!');
         }
     };
 
@@ -257,6 +265,7 @@ Obs.: Início da cobrança 30 dias após a assinatura da proposta.
 
         saveTemplate(novoTemplate);
         carregarTemplates();
+        mostrarNotificacao('Template duplicado com sucesso!');
     };
 
     return (
@@ -273,6 +282,18 @@ Obs.: Início da cobrança 30 dias após a assinatura da proposta.
                     + Novo Template
                 </button>
             </div>
+
+            {/* Notificação */}
+            {notificacao && (
+                <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center justify-between min-w-[300px] transition-all transform duration-300 ${notificacao.tipo === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'}`}>
+                    <span>{notificacao.mensagem}</span>
+                    <button onClick={() => setNotificacao(null)} className="text-current hover:opacity-70">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            )}
 
             {/* Lista de Templates */}
             {!mostrarForm && (

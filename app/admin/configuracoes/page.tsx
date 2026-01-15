@@ -17,7 +17,7 @@ export default function ConfiguracoesPage() {
         setLoading(false);
     }, []);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         if (!config) return;
 
         const { name, value } = e.target;
@@ -75,12 +75,12 @@ export default function ConfiguracoesPage() {
                     }
                 });
             }
-        } else if (name.startsWith('secoesProposta.')) {
+        } else if (name.startsWith('textosProposta.')) {
             const field = name.split('.')[1];
             setConfig({
                 ...config,
-                secoesProposta: {
-                    ...config.secoesProposta,
+                textosProposta: {
+                    ...config.textosProposta,
                     [field]: value
                 }
             });
@@ -102,8 +102,13 @@ export default function ConfiguracoesPage() {
             <h1 className="text-2xl font-bold text-gray-900 mb-6">Configurações do Sistema</h1>
 
             {mensagem && (
-                <div className={`p-4 mb-6 rounded-lg ${mensagem.tipo === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                    {mensagem.text}
+                <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center gap-3 transition-all transform duration-300 ${mensagem.tipo === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'}`}>
+                    <span>{mensagem.text}</span>
+                    <button onClick={() => setMensagem(null)} className="text-current hover:opacity-75">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
             )}
 
@@ -219,96 +224,35 @@ export default function ConfiguracoesPage() {
             </div>
 
             <div className="bg-white shadow rounded-lg p-6 mb-6">
-                <h2 className="text-lg font-medium text-gray-900 mb-4">Textos Fixos da Proposta (Institucional)</h2>
+                <h2 className="text-lg font-medium text-gray-900 mb-4">Textos da Proposta</h2>
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Introdução (Logo abaixo de "Proposta Comercial")</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Texto de Introdução</label>
+                        <p className="text-xs text-gray-500 mb-2">Texto que aparece no início da proposta, logo após o cabeçalho</p>
                         <textarea
-                            name="secoesProposta.introducao"
-                            value={config.secoesProposta?.introducao || ''}
+                            name="textosProposta.introducao"
+                            value={config.textosProposta?.introducao || ''}
                             onChange={handleChange}
                             className="input w-full"
-                            rows={2}
+                            rows={4}
+                            placeholder="Ex: É com grande satisfação que apresentamos..."
                         />
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Visão</label>
-                            <textarea
-                                name="secoesProposta.visao"
-                                value={config.secoesProposta?.visao || ''}
-                                onChange={handleChange}
-                                className="input w-full"
-                                rows={4}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Missão</label>
-                            <textarea
-                                name="secoesProposta.missao"
-                                value={config.secoesProposta?.missao || ''}
-                                onChange={handleChange}
-                                className="input w-full"
-                                rows={4}
-                            />
-                        </div>
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Negócio / Valores</label>
-                            <textarea
-                                name="secoesProposta.negocio"
-                                value={config.secoesProposta?.negocio || ''}
-                                onChange={handleChange}
-                                className="input w-full"
-                                rows={3}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="border-t pt-4 mt-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-1 font-bold">Título da Seção de Vantagens</label>
-                        <input
-                            type="text"
-                            name="secoesProposta.vantagensTitulo"
-                            value={config.secoesProposta?.vantagensTitulo || ''}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Texto Legal da Mensalidade (Rodapé)</label>
+                        <p className="text-xs text-gray-500 mb-2">Texto legal sobre atualizações, suporte e reajuste</p>
+                        <textarea
+                            name="textosProposta.rodapeMensalidade"
+                            value={config.textosProposta?.rodapeMensalidade || ''}
                             onChange={handleChange}
-                            className="input w-full mb-3"
+                            className="input w-full"
+                            rows={5}
+                            placeholder="Ex: A mensalidade concede direito às atualizações..."
                         />
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Experiência</label>
-                                <textarea
-                                    name="secoesProposta.experiencia"
-                                    value={config.secoesProposta?.experiencia || ''}
-                                    onChange={handleChange}
-                                    className="input w-full"
-                                    rows={5}
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Consultores Técnicos</label>
-                                <textarea
-                                    name="secoesProposta.consultores"
-                                    value={config.secoesProposta?.consultores || ''}
-                                    onChange={handleChange}
-                                    className="input w-full"
-                                    rows={5}
-                                />
-                            </div>
-                            <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Help Desk / Suporte</label>
-                                <textarea
-                                    name="secoesProposta.suporte"
-                                    value={config.secoesProposta?.suporte || ''}
-                                    onChange={handleChange}
-                                    className="input w-full"
-                                    rows={6}
-                                />
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
+
 
             <div className="bg-white shadow rounded-lg p-6 mb-6">
                 <h2 className="text-lg font-medium text-gray-900 mb-4">Integração Pix</h2>

@@ -8,7 +8,7 @@ import { QrCodePix } from 'qrcode-pix';
 interface DetalhesPropostaModalProps {
     proposta: Proposta | null;
     onClose: () => void;
-    onUpdate: () => void;
+    onUpdate: (msg?: string) => void;
 }
 
 export default function DetalhesPropostaModal({ proposta, onClose, onUpdate }: DetalhesPropostaModalProps) {
@@ -32,7 +32,7 @@ export default function DetalhesPropostaModal({ proposta, onClose, onUpdate }: D
         }
 
         updateProposta(novaProposta);
-        onUpdate();
+        onUpdate('Pagamento aprovado com sucesso!');
         onClose();
     };
 
@@ -47,7 +47,7 @@ export default function DetalhesPropostaModal({ proposta, onClose, onUpdate }: D
         }
 
         updateProposta(novaProposta);
-        onUpdate();
+        onUpdate('Comprovante recusado.');
         onClose();
     };
 
