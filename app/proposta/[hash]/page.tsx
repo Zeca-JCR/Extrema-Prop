@@ -65,24 +65,7 @@ export default function PropostaPublica() {
         }
     };
 
-    const handleRecusar = () => {
-        if (!proposta) return;
 
-        const motivo = prompt('Por favor, informe o motivo da recusa (opcional):');
-
-        if (confirm('Tem certeza que deseja recusar esta proposta?')) {
-            const propostaAtualizada: Proposta = {
-                ...proposta,
-                status: 'recusada',
-                updatedAt: new Date().toISOString(),
-                observacoes: proposta.observacoes + `\n\nRecusada pelo cliente em ${new Date().toLocaleString('pt-BR')}${motivo ? `. Motivo: ${motivo}` : ''}`,
-            };
-
-            updateProposta(propostaAtualizada);
-            setProposta(propostaAtualizada);
-            alert('Proposta recusada com sucesso. Entraremos em contato em breve.');
-        }
-    };
 
     const handleAceiteSuccess = (propostaAtualizada: Proposta) => {
         setProposta(propostaAtualizada);
@@ -117,7 +100,7 @@ export default function PropostaPublica() {
     }
 
     const diasRest = diasRestantes(proposta.dataValidade);
-    const podeAceitar = !expirada && proposta.status !== 'recusada' && proposta.status !== 'aceita' && proposta.status !== 'comprovante_enviado' && proposta.status !== 'paga';
+    const podeAceitar = !expirada && proposta.status !== 'aceita' && proposta.status !== 'comprovante_enviado' && proposta.status !== 'paga';
 
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4">
@@ -126,9 +109,9 @@ export default function PropostaPublica() {
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
-                            <div className="relative w-64 h-32">
+                            <div className="relative w-56 h-20">
                                 <Image
-                                    src="/images/logo.png"
+                                    src="/images/logo_atual.png"
                                     alt="Extrema Tecnologia"
                                     fill
                                     className="object-contain object-left"
@@ -148,16 +131,16 @@ export default function PropostaPublica() {
                         </div>
                     </div>
 
-                    {/* Linha divisória e Saudação */}
-                    {config?.textosProposta?.introducao && (
-                        <>
-                            <div className="border-t border-gray-200 my-4"></div>
-                            <h2 className="text-lg font-semibold text-gray-900 mb-1">Prezado(a), {proposta.cliente.contato}</h2>
-                            <p className="text-sm text-gray-600 mb-4">{proposta.cliente.empresa}</p>
-                            <p className="text-gray-700 whitespace-pre-line">{config.textosProposta.introducao}</p>
-                        </>
-                    )}
                 </div>
+
+                {/* Saudação e Introdução separadas */}
+                {config?.textosProposta?.introducao && (
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                        <h2 className="text-lg font-semibold text-gray-900 mb-1">Prezado(a), {proposta.cliente.contato}</h2>
+                        <p className="text-sm text-gray-600 mb-4">{proposta.cliente.empresa}</p>
+                        <p className="text-gray-700 whitespace-pre-line">{config.textosProposta.introducao}</p>
+                    </div>
+                )}
 
                 {/* Alerta de Status Especial */}
                 {proposta.status === 'comprovante_enviado' && (
@@ -210,22 +193,7 @@ export default function PropostaPublica() {
                     </div>
                 )}
 
-                {/* Alerta de Recusada */}
-                {proposta.status === 'recusada' && (
-                    <div className="bg-gray-100 border border-gray-300 rounded-xl p-4 mb-6">
-                        <div className="flex items-start space-x-3">
-                            <svg className="w-6 h-6 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                            <div>
-                                <h3 className="text-sm font-semibold text-gray-900">Proposta Recusada</h3>
-                                <p className="text-sm text-gray-700 mt-1">
-                                    Esta proposta foi recusada. Se mudar de ideia, entre em contato conosco.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                )}
+
 
                 {/* Produto */}
                 <div className="card p-6 mb-6">
@@ -264,29 +232,30 @@ export default function PropostaPublica() {
                 </div>
 
                 {/* Investimento Inicial (Adesão) */}
-                <div className="card overflow-hidden mb-6">
+                <div className="card overflow-hidden mb-6 border-l-4 border-l-blue-600">
                     {/* Header Azul */}
-                    <div className="p-6 bg-gradient-to-r from-blue-600 to-blue-800 text-white">
+                    {/* Header Azul - Estilo Clean com Borda Lateral */}
+                    <div className="p-6 bg-white">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-white/80 text-sm mb-1">Investimento Inicial (Adesão)</p>
-                                <p className="text-3xl font-bold">{formatCurrency(proposta.valores.investimentoInicial)}</p>
+                                <p className="text-gray-500 text-sm mb-1">Investimento Inicial (Adesão)</p>
+                                <p className="text-3xl font-bold text-gray-900">{formatCurrency(proposta.valores.investimentoInicial)}</p>
                             </div>
-                            <svg className="w-16 h-16 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-16 h-16 text-blue-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
                         {proposta.detalhesInvestimento && (
-                            <div className="mt-4 pt-4 border-t border-white/20">
-                                <p className="text-xs font-semibold text-white/90 mb-1">O que está incluso:</p>
-                                <p className="text-xs text-white/80 whitespace-pre-line">{proposta.detalhesInvestimento}</p>
+                            <div className="mt-4 pt-4 border-t border-gray-100">
+                                <p className="text-xs font-semibold text-gray-700 mb-1">O que está incluso:</p>
+                                <p className="text-xs text-gray-600 whitespace-pre-line">{proposta.detalhesInvestimento}</p>
                             </div>
                         )}
                     </div>
 
                     {/* Opções de Pagamento */}
                     <div className="p-6 bg-white">
-                        <h3 className="text-sm font-semibold text-gray-700 mb-4">Condições de Pagamento</h3>
+                        <h3 className="text-sm font-semibold text-gray-700 mb-4">Condições de Pagamento:</h3>
                         <div className={`grid grid-cols-1 ${proposta.valores.parcelamento.qtdParcelas > 1 ? 'md:grid-cols-2' : ''} gap-4`}>
                             {/* À Vista */}
                             <div className="p-4 border-2 border-green-200 bg-green-50 rounded-lg">
@@ -339,20 +308,21 @@ export default function PropostaPublica() {
                 </div>
 
                 {/* Mensalidade */}
-                <div className="card p-6 mb-6 gradient-extrema text-white">
+                {/* Mensalidade - Estilo Clean com Borda Lateral */}
+                <div className="card p-6 mb-6 bg-white border-l-4 border-l-extrema-purple">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-white/80 text-sm mb-1">Mensalidade Recorrente</p>
-                            <p className="text-3xl font-bold">{formatCurrency(proposta.valores.mensalidade)}/mês</p>
+                            <p className="text-gray-500 text-sm mb-1">Mensalidade Recorrente</p>
+                            <p className="text-3xl font-bold text-gray-900">{formatCurrency(proposta.valores.mensalidade)}/mês</p>
                         </div>
-                        <svg className="w-16 h-16 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-16 h-16 text-purple-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                     {proposta.detalhesMensalidade && (
-                        <div className="mt-4 pt-4 border-t border-white/20">
-                            <p className="text-xs font-semibold text-white/90 mb-1">Observações:</p>
-                            <p className="text-xs text-white/80 whitespace-pre-line">
+                        <div className="mt-4 pt-4 border-t border-gray-100">
+                            <p className="text-xs font-semibold text-gray-700 mb-1">Observações:</p>
+                            <p className="text-xs text-gray-600 whitespace-pre-line">
                                 {proposta.detalhesMensalidade?.split('\n').filter(line => !line.trim().startsWith('Investimento em mensalidade para')).join('\n').trim()}
                             </p>
                         </div>
@@ -362,7 +332,7 @@ export default function PropostaPublica() {
                 {/* Ações */}
                 {
                     podeAceitar && (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                             <button
                                 onClick={() => setShowAceiteModal(true)}
                                 className="btn btn-primary py-4 text-base"
@@ -415,12 +385,7 @@ export default function PropostaPublica() {
                                     </div>
                                 )}
                             </div>
-                            <button
-                                onClick={handleRecusar}
-                                className="btn btn-ghost py-4 text-base text-red-600 hover:bg-red-50"
-                            >
-                                ✗ Recusar
-                            </button>
+
                         </div>
                     )
                 }
@@ -464,24 +429,19 @@ export default function PropostaPublica() {
                             (47) 99681-8985
                         </a>
                     </div>
+
+
                 </div>
 
-                {/* Slogan */}
-                <div className="flex justify-center mt-8 mb-4">
-                    <div className="relative w-96 h-24">
-                        <Image
-                            src="/images/slogan.png"
-                            alt="Extrema Tecnologia"
-                            fill
-                            className="object-contain"
-                        />
-                    </div>
-                </div>
+
 
                 {/* Footer Extrema */}
-                <div className="text-center mt-8 text-sm text-gray-500">
-                    <p>© 2026 Extrema Software de Gestão Empresarial</p>
-                    <p className="mt-1">São Bento do Sul-SC | Balneário Piçarras-SC</p>
+                <div className="flex items-center justify-center mt-2 text-sm text-gray-500">
+                    <span>© 2026 Extrema Software de Gestão Empresarial</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 ml-2 mr-1 text-gray-400">
+                        <path fillRule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clipRule="evenodd" />
+                    </svg>
+                    <span>São Bento do Sul-SC | Balneário Piçarras-SC</span>
                 </div>
                 {/* Modal de Aceite */}
                 {
