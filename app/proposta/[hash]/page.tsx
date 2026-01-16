@@ -119,7 +119,7 @@ export default function PropostaPublica() {
                             </div>
                             <div>
                                 <h1 className="text-xl font-bold text-gray-900">Proposta Comercial</h1>
-                                <p className="text-sm text-gray-600">{proposta.numero}</p>
+                                <p className="text-sm text-gray-600">{proposta.produto.nome} - {proposta.cliente.empresa} ({proposta.numero})</p>
                             </div>
                         </div>
                         <div className="text-right">
@@ -136,7 +136,7 @@ export default function PropostaPublica() {
                 {/* Saudação e Introdução separadas */}
                 {config?.textosProposta?.introducao && (
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-                        <h2 className="text-lg font-semibold text-gray-900 mb-1">Prezado(a), {proposta.cliente.contato}</h2>
+                        <h2 className="text-lg font-semibold text-gray-900 mb-1">{proposta.cliente.saudacao || 'Prezado(a)'} {proposta.cliente.contato}</h2>
                         <p className="text-sm text-gray-600 mb-4">{proposta.cliente.empresa}</p>
                         <p className="text-gray-700 whitespace-pre-line">{config.textosProposta.introducao}</p>
                     </div>
@@ -231,11 +231,14 @@ export default function PropostaPublica() {
                     </div>
                 </div>
 
-                {/* Investimento Inicial (Adesão) */}
+                {/* Valores e Condições Comerciais */}
                 <div className="card overflow-hidden mb-6 border-l-4 border-l-blue-600">
-                    {/* Header Azul */}
-                    {/* Header Azul - Estilo Clean com Borda Lateral */}
-                    <div className="p-6 bg-white">
+                    <div className="p-6 bg-white border-b border-gray-100">
+                        <h2 className="text-lg font-semibold text-gray-900">Valores e Condições Comerciais</h2>
+                    </div>
+
+                    {/* Investimento Inicial (Adesão) */}
+                    <div className="p-6 pb-2 bg-white">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-gray-500 text-sm mb-1">Investimento Inicial (Adesão)</p>
@@ -254,7 +257,7 @@ export default function PropostaPublica() {
                     </div>
 
                     {/* Opções de Pagamento */}
-                    <div className="p-6 bg-white">
+                    <div className="p-6 pt-2 bg-white">
                         <h3 className="text-sm font-semibold text-gray-700 mb-4">Condições de Pagamento:</h3>
                         <div className={`grid grid-cols-1 ${proposta.valores.parcelamento.qtdParcelas > 1 ? 'md:grid-cols-2' : ''} gap-4`}>
                             {/* À Vista */}
@@ -305,28 +308,29 @@ export default function PropostaPublica() {
                             )}
                         </div>
                     </div>
-                </div>
 
-                {/* Mensalidade */}
-                {/* Mensalidade - Estilo Clean com Borda Lateral */}
-                <div className="card p-6 mb-6 bg-white border-l-4 border-l-extrema-purple">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-gray-500 text-sm mb-1">Mensalidade Recorrente</p>
-                            <p className="text-3xl font-bold text-gray-900">{formatCurrency(proposta.valores.mensalidade)}/mês</p>
+                    <hr className="border-gray-200" />
+
+                    {/* Mensalidade */}
+                    <div className="p-6 bg-white">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-gray-500 text-sm mb-1">Mensalidade Recorrente</p>
+                                <p className="text-3xl font-bold text-gray-900">{formatCurrency(proposta.valores.mensalidade)}/mês</p>
+                            </div>
+                            <svg className="w-16 h-16 text-purple-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
                         </div>
-                        <svg className="w-16 h-16 text-purple-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        {proposta.detalhesMensalidade && (
+                            <div className="mt-4 pt-4 border-t border-gray-100">
+                                <p className="text-xs font-semibold text-gray-700 mb-1">Observações:</p>
+                                <p className="text-xs text-gray-600 whitespace-pre-line">
+                                    {proposta.detalhesMensalidade?.split('\n').filter(line => !line.trim().startsWith('Investimento em mensalidade para')).join('\n').trim()}
+                                </p>
+                            </div>
+                        )}
                     </div>
-                    {proposta.detalhesMensalidade && (
-                        <div className="mt-4 pt-4 border-t border-gray-100">
-                            <p className="text-xs font-semibold text-gray-700 mb-1">Observações:</p>
-                            <p className="text-xs text-gray-600 whitespace-pre-line">
-                                {proposta.detalhesMensalidade?.split('\n').filter(line => !line.trim().startsWith('Investimento em mensalidade para')).join('\n').trim()}
-                            </p>
-                        </div>
-                    )}
                 </div>
 
                 {/* Ações */}

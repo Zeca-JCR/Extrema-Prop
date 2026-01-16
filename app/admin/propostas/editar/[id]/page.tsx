@@ -20,6 +20,7 @@ export default function EditarProposta({ params }: { params: Promise<{ id: strin
 
     // Dados do cliente
     const [clienteEmpresa, setClienteEmpresa] = useState('');
+    const [clienteSaudacao, setClienteSaudacao] = useState('Prezado(a)');
     const [clienteContato, setClienteContato] = useState('');
     const [clienteEmail, setClienteEmail] = useState('');
     const [clienteTelefone, setClienteTelefone] = useState('');
@@ -62,6 +63,7 @@ export default function EditarProposta({ params }: { params: Promise<{ id: strin
 
                 // Populate fields
                 setClienteEmpresa(proposta.cliente.empresa);
+                setClienteSaudacao(proposta.cliente.saudacao || 'Prezado(a)');
                 setClienteContato(proposta.cliente.contato);
                 setClienteEmail(proposta.cliente.email);
                 setClienteTelefone(proposta.cliente.telefone);
@@ -231,6 +233,7 @@ export default function EditarProposta({ params }: { params: Promise<{ id: strin
                 contato: clienteContato,
                 email: clienteEmail,
                 telefone: clienteTelefone,
+                saudacao: clienteSaudacao,
             },
             produto: {
                 ...propostaOriginal.produto,
@@ -350,6 +353,21 @@ export default function EditarProposta({ params }: { params: Promise<{ id: strin
                                 placeholder="Nome da empresa"
                                 required
                             />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Saudação</label>
+                            <select
+                                value={clienteSaudacao}
+                                onChange={(e) => setClienteSaudacao(e.target.value)}
+                                className="input"
+                            >
+                                <option value="Prezado(a)">Prezado(a)</option>
+                                <option value="Prezado">Prezado</option>
+                                <option value="Prezada">Prezada</option>
+                                <option value="Prezado Sr.">Prezado Sr.</option>
+                                <option value="Prezada Sra.">Prezada Sra.</option>
+                                <option value="Aos cuidados de">Aos cuidados de</option>
+                            </select>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Contato *</label>

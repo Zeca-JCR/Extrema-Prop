@@ -15,6 +15,7 @@ export interface Cliente {
     contato: string;
     email: string;
     telefone: string;
+    saudacao?: string; // 'Prezado(a)', 'Prezado', 'Prezada', 'Aos cuidados de', etc.
 }
 
 export interface Produto {

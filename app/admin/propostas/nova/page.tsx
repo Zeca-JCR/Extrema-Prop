@@ -18,6 +18,7 @@ export default function NovaProposta() {
 
     // Dados do cliente
     const [clienteEmpresa, setClienteEmpresa] = useState('');
+    const [clienteSaudacao, setClienteSaudacao] = useState('Prezado(a)');
     const [clienteContato, setClienteContato] = useState('');
     const [clienteEmail, setClienteEmail] = useState('');
     const [clienteTelefone, setClienteTelefone] = useState('');
@@ -215,6 +216,7 @@ export default function NovaProposta() {
                 contato: clienteContato,
                 email: clienteEmail,
                 telefone: clienteTelefone,
+                saudacao: clienteSaudacao,
             },
             produto: {
                 nome: produtoNome,
@@ -333,6 +335,21 @@ export default function NovaProposta() {
                                 placeholder="Nome da empresa"
                                 required
                             />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Saudação</label>
+                            <select
+                                value={clienteSaudacao}
+                                onChange={(e) => setClienteSaudacao(e.target.value)}
+                                className="input"
+                            >
+                                <option value="Prezado(a)">Prezado(a)</option>
+                                <option value="Prezado">Prezado</option>
+                                <option value="Prezada">Prezada</option>
+                                <option value="Prezado Sr.">Prezado Sr.</option>
+                                <option value="Prezada Sra.">Prezada Sra.</option>
+                                <option value="Aos cuidados de">Aos cuidados de</option>
+                            </select>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Contato *</label>
