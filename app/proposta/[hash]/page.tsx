@@ -106,7 +106,7 @@ export default function PropostaPublica() {
         <div className="min-h-screen bg-gray-50 py-8 px-4">
             <div className="max-w-3xl mx-auto">
                 {/* Header com Logo */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-3">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
                             <div className="relative w-56 h-20">
@@ -135,7 +135,7 @@ export default function PropostaPublica() {
 
                 {/* Saudação e Introdução separadas */}
                 {config?.textosProposta?.introducao && (
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-3">
                         <h2 className="text-lg font-semibold text-gray-900 mb-1">{proposta.cliente.saudacao || 'Prezado(a)'} {proposta.cliente.contato}</h2>
                         <p className="text-sm text-gray-600 mb-4">{proposta.cliente.empresa}</p>
                         <p className="text-gray-700 whitespace-pre-line">{config.textosProposta.introducao}</p>
@@ -144,7 +144,7 @@ export default function PropostaPublica() {
 
                 {/* Alerta de Status Especial */}
                 {proposta.status === 'comprovante_enviado' && (
-                    <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 mb-6">
+                    <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 mb-3">
                         <div className="flex items-start space-x-3">
                             <svg className="w-6 h-6 text-purple-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -160,7 +160,7 @@ export default function PropostaPublica() {
                 )}
 
                 {proposta.status === 'paga' && (
-                    <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
+                    <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-3">
                         <div className="flex items-start space-x-3">
                             <svg className="w-6 h-6 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -177,7 +177,7 @@ export default function PropostaPublica() {
 
                 {/* Alerta de Expiração */}
                 {expirada && (
-                    <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-3">
                         <div className="flex items-start space-x-3">
                             <svg className="w-6 h-6 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -196,7 +196,7 @@ export default function PropostaPublica() {
 
 
                 {/* Produto */}
-                <div className="card p-6 mb-6">
+                <div className="card p-6 mb-3">
                     <h2 className="text-lg font-semibold text-gray-900 mb-2">{proposta.produto.nome}</h2>
                     <p className="text-gray-600 mb-4">{proposta.produto.descricao}</p>
 
@@ -232,7 +232,7 @@ export default function PropostaPublica() {
                 </div>
 
                 {/* Valores e Condições Comerciais */}
-                <div className="card overflow-hidden mb-6 border-l-4 border-l-blue-600">
+                <div className="card overflow-hidden mb-3 border-l-4 border-l-blue-600">
                     <div className="p-6 bg-white border-b border-gray-100">
                         <h2 className="text-lg font-semibold text-gray-900">Valores e Condições Comerciais</h2>
                     </div>
@@ -336,7 +336,7 @@ export default function PropostaPublica() {
                 {/* Ações */}
                 {
                     podeAceitar && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
                             <button
                                 onClick={() => setShowAceiteModal(true)}
                                 className="btn btn-primary py-4 text-base"
@@ -397,7 +397,7 @@ export default function PropostaPublica() {
                 {/* Botão PDF quando não pode aceitar */}
                 {
                     !podeAceitar && (
-                        <div className="flex justify-center mb-6">
+                        <div className="flex justify-center mb-3">
                             <button
                                 onClick={() => handleBaixarPDF(false)}
                                 disabled={gerandoPDF}
