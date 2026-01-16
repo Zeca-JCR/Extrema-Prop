@@ -31,6 +31,13 @@ export default function NovaProposta() {
     const [qtdUsuarios, setQtdUsuarios] = useState('1');
     const [qtdAgendasPresenciais, setQtdAgendasPresenciais] = useState('2'); // Padrão: 2
 
+    // Estados para edição/movimentação de módulos
+    const [editandoModulo, setEditandoModulo] = useState<number | null>(null);
+    const [textoEditandoModulo, setTextoEditandoModulo] = useState('');
+    const [moduloMovido, setModuloMovido] = useState<number | null>(null);
+    const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+    const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
     // Valores
     const [investimentoInicial, setInvestimentoInicial] = useState('1170.00');
     const [descontoPercentual, setDescontoPercentual] = useState('5');
@@ -38,13 +45,13 @@ export default function NovaProposta() {
     const [valorParcela, setValorParcela] = useState('390.00');
     const [mensalidade, setMensalidade] = useState('199.90');
     const [detalhesInvestimento, setDetalhesInvestimento] = useState('');
-    const [detalhesMensalidade, setDetalhesMensalidade] = useState('');
+    const [detalhesMensalidade, setDetalhesMensalidade] = useState(`Obs.: Início da cobrança 30 dias após a assinatura da proposta.
+* Concede direito as atualizações de versão do sistema (regras de negócio, alterações legais/legislação) e suporte técnico via telefone, e-mail e whatsapp. Este valor é reajustado anualmente pelo IGP-M ou por outro índice que venha a substituí-lo.`);
 
     // Condições
     const [condicoesPagamento, setCondicoesPagamento] = useState('');
     const [validadeDias, setValidadeDias] = useState('15');
     const [observacoes, setObservacoes] = useState('');
-    const [reajuste, setReajuste] = useState('Anual (IGPM acumulado)');
 
     // Cálculo automático do valor da parcela
     useEffect(() => {
@@ -74,6 +81,8 @@ export default function NovaProposta() {
         }
     }, [investimentoInicial, qtdParcelas, valorParcela, mensalidade]);
 
+
+
     const aplicarTemplate = (template: Template) => {
         setTemplateSelecionado(template);
         setProdutoNome(template.produto.nome);
@@ -89,8 +98,11 @@ export default function NovaProposta() {
         setValorParcela(template.valores.parcelamento.valorParcela.toString());
         setMensalidade(template.valores.mensalidade.toString());
         setDetalhesInvestimento(template.detalhesInvestimento || '');
-        setDetalhesMensalidade(template.detalhesMensalidade || '');
-        setReajuste(template.reajuste || 'Anual (IGPM acumulado)');
+        let limpaDetalhes = template.detalhesMensalidade || '';
+        if (limpaDetalhes.includes('Investimento em mensalidade para')) {
+            limpaDetalhes = limpaDetalhes.split('\n').filter(line => !line.trim().startsWith('Investimento em mensalidade para')).join('\n').trim();
+        }
+        setDetalhesMensalidade(limpaDetalhes);
         setCondicoesPagamento(template.condicoesPagamento);
         // Default limits if not in template (backward compatibility)
         setQtdCnpjs(template.produto.limites?.qtdCnpjs?.toString() || '1');
@@ -107,6 +119,76 @@ export default function NovaProposta() {
 
     const removerModulo = (index: number) => {
         setModulos(modulos.filter((_, i) => i !== index));
+    };
+
+    const iniciarEdicaoModulo = (index: number) => {
+        setEditandoModulo(index);
+        setTextoEditandoModulo(modulos[index]);
+    };
+
+    const salvarEdicaoModulo = () => {
+        if (editandoModulo !== null && textoEditandoModulo.trim()) {
+            const novosModulos = [...modulos];
+            novosModulos[editandoModulo] = textoEditandoModulo.trim();
+            setModulos(novosModulos);
+            setEditandoModulo(null);
+            setTextoEditandoModulo('');
+        }
+    };
+
+    const cancelarEdicaoModulo = () => {
+        setEditandoModulo(null);
+        setTextoEditandoModulo('');
+    };
+
+    const moverModuloCima = (index: number) => {
+        if (index > 0) {
+            const novosModulos = [...modulos];
+            [novosModulos[index - 1], novosModulos[index]] = [novosModulos[index], novosModulos[index - 1]];
+            setModulos(novosModulos);
+            setModuloMovido(index - 1);
+            setTimeout(() => setModuloMovido(null), 2000);
+        }
+    };
+
+    const moverModuloBaixo = (index: number) => {
+        if (index < modulos.length - 1) {
+            const novosModulos = [...modulos];
+            [novosModulos[index], novosModulos[index + 1]] = [novosModulos[index + 1], novosModulos[index]];
+            setModulos(novosModulos);
+            setModuloMovido(index + 1);
+            setTimeout(() => setModuloMovido(null), 2000);
+        }
+    };
+
+    const handleDragStart = (index: number) => {
+        setDraggedIndex(index);
+    };
+
+    const handleDragOver = (e: React.DragEvent, index: number) => {
+        e.preventDefault();
+        if (draggedIndex !== null && draggedIndex !== index) {
+            setDragOverIndex(index);
+        }
+    };
+
+    const handleDrop = (e: React.DragEvent, index: number) => {
+        e.preventDefault();
+        if (draggedIndex !== null && draggedIndex !== index) {
+            const novosModulos = [...modulos];
+            const [removed] = novosModulos.splice(draggedIndex, 1);
+            novosModulos.splice(index, 0, removed);
+            setModulos(novosModulos);
+            setModuloMovido(index);
+            setTimeout(() => setModuloMovido(null), 2000);
+        }
+        setDraggedIndex(null);
+        setDragOverIndex(null);
+    };
+
+    const handleDragEnd = () => {
+        setDraggedIndex(null);
+        setDragOverIndex(null);
     };
 
     const criarProposta = () => {
@@ -159,7 +241,6 @@ export default function NovaProposta() {
             condicoesPagamento,
             detalhesInvestimento,
             detalhesMensalidade,
-            reajuste,
             validadeDias: parseInt(validadeDias),
             dataValidade,
             observacoes,
@@ -326,23 +407,137 @@ export default function NovaProposta() {
                                 placeholder="Descrição do produto ou serviço"
                             />
                         </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Qtd. CNPJs</label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={qtdCnpjs}
+                                    onChange={(e) => setQtdCnpjs(e.target.value)}
+                                    className="input"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Qtd. Usuários</label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={qtdUsuarios}
+                                    onChange={(e) => setQtdUsuarios(e.target.value)}
+                                    className="input"
+                                />
+                            </div>
+                        </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Módulos/Funcionalidades</label>
                             <div className="space-y-2">
                                 {modulos.map((modulo, index) => (
-                                    <div key={index} className="flex items-center space-x-2">
-                                        <div className="flex-1 px-3 py-2 bg-gray-50 rounded-lg text-sm">
-                                            {modulo}
-                                        </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => removerModulo(index)}
-                                            className="text-red-600 hover:text-red-900"
-                                        >
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
+                                    <div
+                                        key={index}
+                                        className={`flex items-center space-x-2 ${editandoModulo !== index ? 'cursor-grab active:cursor-grabbing' : ''}`}
+                                        draggable={editandoModulo !== index}
+                                        onDragStart={() => handleDragStart(index)}
+                                        onDragOver={(e) => handleDragOver(e, index)}
+                                        onDrop={(e) => handleDrop(e, index)}
+                                        onDragEnd={handleDragEnd}
+                                    >
+                                        {editandoModulo === index ? (
+                                            <>
+                                                <input
+                                                    type="text"
+                                                    value={textoEditandoModulo}
+                                                    onChange={(e) => setTextoEditandoModulo(e.target.value)}
+                                                    onKeyPress={(e) => e.key === 'Enter' && salvarEdicaoModulo()}
+                                                    className="input flex-1"
+                                                    autoFocus
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={salvarEdicaoModulo}
+                                                    className="text-green-600 hover:text-green-900"
+                                                    title="Salvar"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={cancelarEdicaoModulo}
+                                                    className="text-gray-600 hover:text-gray-900"
+                                                    title="Cancelar"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                {/* Drag Handle */}
+                                                <div
+                                                    className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 px-1"
+                                                    title="Arraste para reordenar"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+                                                    </svg>
+                                                </div>
+                                                <div className={`flex-1 px-3 py-2 rounded-lg text-sm transition-all duration-300 ${moduloMovido === index
+                                                    ? 'bg-yellow-100 border-2 border-yellow-400 shadow-md'
+                                                    : dragOverIndex === index
+                                                        ? 'bg-blue-100 border-2 border-blue-400'
+                                                        : draggedIndex === index
+                                                            ? 'opacity-50 bg-gray-100'
+                                                            : 'bg-gray-50'
+                                                    }`}>
+                                                    {modulo}
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => moverModuloCima(index)}
+                                                    disabled={index === 0}
+                                                    className={`${index === 0 ? 'text-gray-300' : 'text-gray-600 hover:text-gray-900'}`}
+                                                    title="Mover para cima"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => moverModuloBaixo(index)}
+                                                    disabled={index === modulos.length - 1}
+                                                    className={`${index === modulos.length - 1 ? 'text-gray-300' : 'text-gray-600 hover:text-gray-900'}`}
+                                                    title="Mover para baixo"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => iniciarEdicaoModulo(index)}
+                                                    className="text-blue-600 hover:text-blue-900"
+                                                    title="Editar"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removerModulo(index)}
+                                                    className="text-red-600 hover:text-red-900"
+                                                    title="Remover"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                            </>
+                                        )}
                                     </div>
                                 ))}
                                 <div className="flex items-center space-x-2">
@@ -460,17 +655,6 @@ export default function NovaProposta() {
                                 className="input"
                                 rows={2}
                                 placeholder="Ex: Licença de uso, Suporte técnico, Backup em nuvem"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Qtd. Agendas Presenciais</label>
-                            <input
-                                type="number"
-                                min="0"
-                                value={qtdAgendasPresenciais}
-                                onChange={(e) => setQtdAgendasPresenciais(e.target.value)}
-                                className="input"
-                                placeholder="2"
                             />
                         </div>
                     </div>

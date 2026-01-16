@@ -125,7 +125,6 @@ export interface Proposta {
     // Detalhamento do Escopo
     detalhesInvestimento?: string; // O que está incluso no setup
     detalhesMensalidade?: string;  // O que está incluso na mensalidade
-    reajuste?: string;             // Ex: IGPM Anual
 
     // Condições
     condicoesPagamento: string;
@@ -147,7 +146,6 @@ export interface Template {
     // Detalhamento Padrão
     detalhesInvestimento?: string;
     detalhesMensalidade?: string;
-    reajuste?: string;
     createdAt: string;
 }
 
@@ -181,7 +179,6 @@ export interface Configuracoes {
 
     textosProposta: {
         introducao: string;      // Texto de introdução personalizável
-        rodapeMensalidade: string; // Texto legal do rodapé da mensalidade
     };
     numeroPropostaAtual: number;
 }
@@ -347,7 +344,6 @@ export const getConfiguracoes = (): Configuracoes => {
 
         textosProposta: {
             introducao: 'É com grande satisfação que apresentamos esta proposta comercial para sua empresa. A Extrema Tecnologia atua há mais de 12 anos com software de Gestão e Automação Comercial, oferecendo soluções inteligentes para seus negócios.',
-            rodapeMensalidade: 'A mensalidade concede direito às atualizações de versão do sistema (regras de negócio, alterações legais/legislação) e suporte técnico via telefone, e-mail e WhatsApp. Este valor é reajustado anualmente pelo IGP-M ou por outro índice que venha a substituí-lo.'
         },
         numeroPropostaAtual: 1,
     };
@@ -424,11 +420,27 @@ export const seedInitialData = (): void => {
                 nome: 'Uniplus Desktop Básico',
                 descricao: 'Sistema de gestão completo para desktop',
                 modulos: [
-                    'Controle de Estoque',
-                    'PDV (Frente de Caixa)',
-                    'Contas a Pagar e Receber',
-                    'Nota Fiscal Eletrônica (NF-e/NFC-e)',
-                    'Relatórios Gerenciais',
+                    'Cadastro de Clientes',
+                    'Cadastro de Fornecedores',
+                    'Cadastro de Produtos',
+                    'Cadastro de Serviços',
+                    'Cadastro de Transportadoras',
+                    'Cadastro de Mecânicos',
+                    'Perfis de Usuário',
+                    'NF-e (Nota Fiscal Eletrônica)',
+                    'NFS-e (Nota Fiscal de Serviço)',
+                    'Ordem de Serviço',
+                    'Controle de Estoque (Levantamento, Entradas, Saídas e Transferências)',
+                    'Locais de Estoque',
+                    'Precificação e Reajuste de Preços',
+                    'Notas Fiscais de Entrada (XML)',
+                    'Pedidos de Compras',
+                    'Contas a Pagar/Receber',
+                    'Caixa e Bancos',
+                    'Emissão de Boleto',
+                    'Fluxo de Caixa/DRE/Plano de Contas',
+                    'SPED Fiscal',
+                    '+100 Relatórios'
                 ],
                 limites: {
                     qtdCnpjs: 1,
@@ -449,7 +461,6 @@ export const seedInitialData = (): void => {
                 'Entrada via PIX + 2 boletos (30 e 60 dias). Mensalidade cobrada após 30 dias da assinatura.',
             detalhesInvestimento: 'Instalação remota, Configuração inicial, Treinamento online (4 horas).',
             detalhesMensalidade: 'Licença de uso, Suporte técnico (seg-sex 08h às 18h), Atualizações fiscais.',
-            reajuste: 'Anual (IGPM acumulado)',
             createdAt: new Date().toISOString(),
         },
     ];

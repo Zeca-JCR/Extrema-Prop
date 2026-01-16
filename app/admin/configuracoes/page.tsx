@@ -238,21 +238,8 @@ export default function ConfiguracoesPage() {
                             placeholder="Ex: É com grande satisfação que apresentamos..."
                         />
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Texto Legal da Mensalidade (Rodapé)</label>
-                        <p className="text-xs text-gray-500 mb-2">Texto legal sobre atualizações, suporte e reajuste</p>
-                        <textarea
-                            name="textosProposta.rodapeMensalidade"
-                            value={config.textosProposta?.rodapeMensalidade || ''}
-                            onChange={handleChange}
-                            className="input w-full"
-                            rows={5}
-                            placeholder="Ex: A mensalidade concede direito às atualizações..."
-                        />
-                    </div>
                 </div>
             </div>
-
 
             <div className="bg-white shadow rounded-lg p-6 mb-6">
                 <h2 className="text-lg font-medium text-gray-900 mb-4">Integração Pix</h2>

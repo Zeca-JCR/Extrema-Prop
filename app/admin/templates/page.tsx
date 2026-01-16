@@ -30,6 +30,8 @@ export default function TemplatesPage() {
     const [editandoModulo, setEditandoModulo] = useState<number | null>(null);
     const [textoEditandoModulo, setTextoEditandoModulo] = useState('');
     const [moduloMovido, setModuloMovido] = useState<number | null>(null);
+    const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+    const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
     const [investimentoInicial, setInvestimentoInicial] = useState('');
     const [descontoPercentual, setDescontoPercentual] = useState('5');
     const [qtdParcelas, setQtdParcelas] = useState('3');
@@ -39,8 +41,9 @@ export default function TemplatesPage() {
     const [qtdCnpjs, setQtdCnpjs] = useState('1');
     const [qtdUsuarios, setQtdUsuarios] = useState('1');
     const [detalhesInvestimento, setDetalhesInvestimento] = useState('');
-    const [detalhesMensalidade, setDetalhesMensalidade] = useState('');
-    const [reajuste, setReajuste] = useState('Anual (IGPM acumulado)');
+    const [detalhesMensalidade, setDetalhesMensalidade] = useState(`Obs.: Início da cobrança 30 dias após a assinatura da proposta.
+* Concede direito as atualizações de versão do sistema (regras de negócio, alterações legais/legislação) e suporte técnico via telefone, e-mail e whatsapp. Este valor é reajustado anualmente pelo IGP-M ou por outro índice que venha a substituí-lo.`);
+    const [isGlobal, setIsGlobal] = useState(false);
 
     const carregarTemplates = () => {
         setTemplates(getTemplates());
@@ -78,18 +81,7 @@ export default function TemplatesPage() {
         }
     }, [investimentoInicial, qtdParcelas, editando]);
 
-    // Atualização automática dos detalhes da mensalidade (texto dinâmico)
-    useEffect(() => {
-        if (!editando && qtdCnpjs && qtdUsuarios) {
-            const textoMensalidade = `Investimento em mensalidade para ${qtdCnpjs} CNPJ${parseInt(qtdCnpjs) > 1 ? 's' : ''} e ${qtdUsuarios} usuário${parseInt(qtdUsuarios) > 1 ? 's' : ''}.
-Obs.: Início da cobrança 30 dias após a assinatura da proposta.
-* Concede direito as atualizações de versão do sistema (regras de negócio, alterações legais/legislação) e suporte técnico via telefone, e-mail e whatsapp. Este valor é reajustado anualmente pelo IGP-M ou por outro índice que venha a substituí-lo.`;
 
-            // Só atualiza se o campo estiver vazio ou se o usuário não tiver editado manualmente (podemos usar uma flag ou verificação simples)
-            // Aqui vamos assumir que se for novo template (!editando), sempre atualiza
-            setDetalhesMensalidade(textoMensalidade);
-        }
-    }, [qtdCnpjs, qtdUsuarios, editando]);
 
     const limparForm = () => {
         setNome('');
@@ -108,9 +100,9 @@ Obs.: Início da cobrança 30 dias após a assinatura da proposta.
         setQtdCnpjs('1');
         setQtdUsuarios('1');
         setDetalhesInvestimento('Ref. implantação, configurações iniciais e treinamento (02 agendas).');
-        setDetalhesMensalidade('');
-        setReajuste('Anual (IGPM acumulado)');
-        setEditando(null);
+        setDetalhesMensalidade(`Obs.: Início da cobrança 30 dias após a assinatura da proposta.
+* Concede direito as atualizações de versão do sistema (regras de negócio, alterações legais/legislação) e suporte técnico via telefone, e-mail e whatsapp. Este valor é reajustado anualmente pelo IGP-M ou por outro índice que venha a substituí-lo.`);
+        setIsGlobal(false);
         setEditando(null);
         setMostrarForm(false);
     };
@@ -122,7 +114,7 @@ Obs.: Início da cobrança 30 dias após a assinatura da proposta.
         setQtdUsuarios('1');
         setDetalhesInvestimento('Ref. implantação, configurações iniciais e treinamento (02 agendas).');
         setDetalhesMensalidade('');
-        setReajuste('Anual (IGPM acumulado)');
+        setIsGlobal(false);
         setMostrarForm(true);
     };
 
@@ -177,6 +169,39 @@ Obs.: Início da cobrança 30 dias após a assinatura da proposta.
         }
     };
 
+    // Drag and Drop handlers
+    const handleDragStart = (index: number) => {
+        setDraggedIndex(index);
+    };
+
+    const handleDragOver = (e: React.DragEvent, index: number) => {
+        e.preventDefault();
+        if (draggedIndex !== null && draggedIndex !== index) {
+            setDragOverIndex(index);
+        }
+    };
+
+    const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+        e.preventDefault();
+        if (draggedIndex === null || draggedIndex === dropIndex) return;
+
+        const novosModulos = [...modulos];
+        const [removed] = novosModulos.splice(draggedIndex, 1);
+        novosModulos.splice(dropIndex, 0, removed);
+
+        setModulos(novosModulos);
+        setModuloMovido(dropIndex);
+        setTimeout(() => setModuloMovido(null), 2000);
+
+        setDraggedIndex(null);
+        setDragOverIndex(null);
+    };
+
+    const handleDragEnd = () => {
+        setDraggedIndex(null);
+        setDragOverIndex(null);
+    };
+
     const handleSalvar = () => {
         if (!nome || !produtoNome || !investimentoInicial || !mensalidade) {
             alert('Preencha todos os campos obrigatórios');
@@ -186,7 +211,7 @@ Obs.: Início da cobrança 30 dias após a assinatura da proposta.
         const template: Template = {
             id: editando?.id || uuidv4(),
             nome,
-            vendedorId: user?.id || null,
+            vendedorId: isGlobal ? null : (user?.id || null),
             produto: {
                 nome: produtoNome,
                 descricao: produtoDescricao,
@@ -209,7 +234,6 @@ Obs.: Início da cobrança 30 dias após a assinatura da proposta.
             condicoesPagamento,
             detalhesInvestimento,
             detalhesMensalidade,
-            reajuste,
             createdAt: editando?.createdAt || new Date().toISOString(),
         };
 
@@ -236,8 +260,13 @@ Obs.: Início da cobrança 30 dias após a assinatura da proposta.
         setQtdCnpjs(template.produto.limites?.qtdCnpjs?.toString() || '1');
         setQtdUsuarios(template.produto.limites?.qtdUsuarios?.toString() || '1');
         setDetalhesInvestimento(template.detalhesInvestimento || '');
-        setDetalhesMensalidade(template.detalhesMensalidade || '');
-        setReajuste(template.reajuste || 'Anual (IGPM acumulado)');
+        // Limpar redundância de detalhes da mensalidade ao editar (backward compatibility)
+        let limpaDetalhes = template.detalhesMensalidade || '';
+        if (limpaDetalhes.includes('Investimento em mensalidade para')) {
+            limpaDetalhes = limpaDetalhes.split('\n').filter(line => !line.trim().startsWith('Investimento em mensalidade para')).join('\n').trim();
+        }
+        setDetalhesMensalidade(limpaDetalhes);
+        setIsGlobal(template.vendedorId === null);
         setMostrarForm(true);
     };
 
@@ -259,6 +288,11 @@ Obs.: Início da cobrança 30 dias após a assinatura da proposta.
             vendedorId: user?.id || null,
             createdAt: new Date().toISOString(),
         };
+
+        // Limpar redundância de detalhes da mensalidade ao duplicar
+        if (novoTemplate.detalhesMensalidade && novoTemplate.detalhesMensalidade.includes('Investimento em mensalidade para')) {
+            novoTemplate.detalhesMensalidade = novoTemplate.detalhesMensalidade.split('\n').filter(line => !line.trim().startsWith('Investimento em mensalidade para')).join('\n').trim();
+        }
 
         // Garantir que não estamos copiando referências indesejadas se houver
         // No caso do JSON.parse/stringify já resolveu a deep copy dos objetos aninhados (produto, valores)
@@ -416,7 +450,15 @@ Obs.: Início da cobrança 30 dias após a assinatura da proposta.
                             <label className="block text-sm font-medium text-gray-700 mb-1">Módulos/Funcionalidades</label>
                             <div className="space-y-2">
                                 {modulos.map((modulo, index) => (
-                                    <div key={index} className="flex items-center space-x-2">
+                                    <div
+                                        key={index}
+                                        className={`flex items-center space-x-2 ${editandoModulo !== index ? 'cursor-grab active:cursor-grabbing' : ''}`}
+                                        draggable={editandoModulo !== index}
+                                        onDragStart={() => handleDragStart(index)}
+                                        onDragOver={(e) => handleDragOver(e, index)}
+                                        onDrop={(e) => handleDrop(e, index)}
+                                        onDragEnd={handleDragEnd}
+                                    >
                                         {editandoModulo === index ? (
                                             <>
                                                 <input
@@ -448,9 +490,22 @@ Obs.: Início da cobrança 30 dias após a assinatura da proposta.
                                             </>
                                         ) : (
                                             <>
-                                                <div className={`flex-1 px-3 py-2 rounded-lg text-sm transition-all duration-500 ${moduloMovido === index
+                                                {/* Drag Handle */}
+                                                <div
+                                                    className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 px-1"
+                                                    title="Arraste para reordenar"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+                                                    </svg>
+                                                </div>
+                                                <div className={`flex-1 px-3 py-2 rounded-lg text-sm transition-all duration-300 ${moduloMovido === index
                                                     ? 'bg-yellow-100 border-2 border-yellow-400 shadow-md'
-                                                    : 'bg-gray-50'
+                                                    : dragOverIndex === index
+                                                        ? 'bg-blue-100 border-2 border-blue-400'
+                                                        : draggedIndex === index
+                                                            ? 'opacity-50 bg-gray-100'
+                                                            : 'bg-gray-50'
                                                     }`}>
                                                     {modulo}
                                                 </div>

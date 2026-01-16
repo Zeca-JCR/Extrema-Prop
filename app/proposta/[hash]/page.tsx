@@ -121,17 +121,17 @@ export default function PropostaPublica() {
 
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4">
-            <div className="max-w-2xl mx-auto">
+            <div className="max-w-3xl mx-auto">
                 {/* Header com Logo */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
-                            <div className="relative w-32 h-16">
+                            <div className="relative w-64 h-32">
                                 <Image
-                                    src="/extrema-logo.jpg"
+                                    src="/images/logo.png"
                                     alt="Extrema Tecnologia"
                                     fill
-                                    className="object-contain"
+                                    className="object-contain object-left"
                                 />
                             </div>
                             <div>
@@ -147,347 +147,354 @@ export default function PropostaPublica() {
                             )}
                         </div>
                     </div>
-                </div>
-            </div>
 
-
-
-            {/* Seção de Introdução */}
-            {config?.textosProposta?.introducao && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-1">Prezado(a), {proposta.cliente.contato}</h2>
-                    <p className="text-sm text-gray-600 mb-4">{proposta.cliente.empresa}</p>
-                    <p className="text-gray-700 whitespace-pre-line">{config.textosProposta.introducao}</p>
-                </div>
-            )}
-
-            {/* Alerta de Status Especial */}
-            {proposta.status === 'comprovante_enviado' && (
-                <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 mb-6">
-                    <div className="flex items-start space-x-3">
-                        <svg className="w-6 h-6 text-purple-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <div>
-                            <h3 className="text-sm font-semibold text-purple-900">Proposta Aceita - Aguardando Confirmação</h3>
-                            <p className="text-sm text-purple-700 mt-1">
-                                Recebemos seu comprovante de pagamento. Nossa equipe está verificando e entrará em contato em breve.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {proposta.status === 'paga' && (
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
-                    <div className="flex items-start space-x-3">
-                        <svg className="w-6 h-6 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        <div>
-                            <h3 className="text-sm font-semibold text-green-900">Pagamento Confirmado! ✓</h3>
-                            <p className="text-sm text-green-700 mt-1">
-                                Seu pagamento foi confirmado. Em breve você receberá o contrato para assinatura.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Alerta de Expiração */}
-            {expirada && (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
-                    <div className="flex items-start space-x-3">
-                        <svg className="w-6 h-6 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <div>
-                            <h3 className="text-sm font-semibold text-red-900">Proposta Expirada</h3>
-                            <p className="text-sm text-red-700 mt-1">
-                                Esta proposta expirou em {formatDate(proposta.dataValidade, 'long')}.
-                                Entre em contato conosco para solicitar uma nova proposta.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Alerta de Recusada */}
-            {proposta.status === 'recusada' && (
-                <div className="bg-gray-100 border border-gray-300 rounded-xl p-4 mb-6">
-                    <div className="flex items-start space-x-3">
-                        <svg className="w-6 h-6 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                        <div>
-                            <h3 className="text-sm font-semibold text-gray-900">Proposta Recusada</h3>
-                            <p className="text-sm text-gray-700 mt-1">
-                                Esta proposta foi recusada. Se mudar de ideia, entre em contato conosco.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Dados do Cliente */}
-            <div className="card p-6 mb-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Para</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <p className="text-sm text-gray-600">Empresa</p>
-                        <p className="font-semibold text-gray-900">{proposta.cliente.empresa}</p>
-                    </div>
-                    <div>
-                        <p className="text-sm text-gray-600">Contato</p>
-                        <p className="font-semibold text-gray-900">{proposta.cliente.contato}</p>
-                    </div>
-                    <div>
-                        <p className="text-sm text-gray-600">Email</p>
-                        <p className="font-semibold text-gray-900">{proposta.cliente.email}</p>
-                    </div>
-                    <div>
-                        <p className="text-sm text-gray-600">Telefone</p>
-                        <p className="font-semibold text-gray-900">{proposta.cliente.telefone}</p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Produto */}
-            <div className="card p-6 mb-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-2">{proposta.produto.nome}</h2>
-                <p className="text-gray-600 mb-4">{proposta.produto.descricao}</p>
-
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Módulos/Funcionalidades Incluídas:</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {proposta.produto.modulos.map((modulo, index) => (
-                        <div key={index} className="flex items-center space-x-2">
-                            <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span className="text-sm text-gray-700">{modulo}</span>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Valores */}
-            <div className={`grid grid-cols-1 ${proposta.valores.parcelamento.qtdParcelas > 1 ? 'md:grid-cols-2' : ''} gap-6 mb-6`}>
-                {/* À Vista */}
-                <div className="card p-6 border-2 border-green-200 bg-green-50">
-                    <div className="flex items-start justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-gray-900">Pagamento à Vista</h3>
-                        <span className="badge bg-green-600 text-white">-{proposta.valores.descontoAvistaPercentual}%</span>
-                    </div>
-                    <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Valor original:</span>
-                            <span className="line-through text-gray-500">{formatCurrency(proposta.valores.investimentoInicial)}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Desconto:</span>
-                            <span className="text-green-600">-{formatCurrency(proposta.valores.descontoAvistaValor)}</span>
-                        </div>
-                        <div className="border-t border-green-300 pt-2 mt-2">
-                            <div className="flex justify-between items-center">
-                                <span className="font-semibold text-gray-900">Valor final:</span>
-                                <span className="text-2xl font-bold text-green-600">{formatCurrency(proposta.valores.valorAvista)}</span>
-                            </div>
-                        </div>
-                    </div>
-                    {proposta.produto.qtdAgendasPresenciais && proposta.produto.qtdAgendasPresenciais > 0 && (
-                        <p className="text-xs text-gray-600 mt-3">
-                            ✓ Inclui {proposta.produto.qtdAgendasPresenciais} agenda{proposta.produto.qtdAgendasPresenciais > 1 ? 's' : ''} presencial{proposta.produto.qtdAgendasPresenciais > 1 ? 'is' : ''}
-                        </p>
+                    {/* Linha divisória e Saudação */}
+                    {config?.textosProposta?.introducao && (
+                        <>
+                            <div className="border-t border-gray-200 my-4"></div>
+                            <h2 className="text-lg font-semibold text-gray-900 mb-1">Prezado(a), {proposta.cliente.contato}</h2>
+                            <p className="text-sm text-gray-600 mb-4">{proposta.cliente.empresa}</p>
+                            <p className="text-gray-700 whitespace-pre-line">{config.textosProposta.introducao}</p>
+                        </>
                     )}
                 </div>
 
-                {/* Parcelado */}
-                {proposta.valores.parcelamento.qtdParcelas > 1 && (
-                    <div className="card p-6">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Pagamento Parcelado</h3>
-                        <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-gray-600">Número de parcelas:</span>
-                                <span className="font-semibold text-gray-900">{proposta.valores.parcelamento.qtdParcelas}x sem juros</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-gray-600">Valor da parcela:</span>
-                                <span className="font-semibold text-gray-900">{formatCurrency(proposta.valores.parcelamento.valorParcela)}</span>
-                            </div>
-                            <div className="border-t border-gray-200 pt-2 mt-2">
-                                <div className="flex justify-between items-center">
-                                    <span className="font-semibold text-gray-900">Valor total:</span>
-                                    <span className="text-2xl font-bold text-extrema-purple">{formatCurrency(proposta.valores.parcelamento.valorTotal)}</span>
-                                </div>
+                {/* Alerta de Status Especial */}
+                {proposta.status === 'comprovante_enviado' && (
+                    <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 mb-6">
+                        <div className="flex items-start space-x-3">
+                            <svg className="w-6 h-6 text-purple-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                                <h3 className="text-sm font-semibold text-purple-900">Proposta Aceita - Aguardando Confirmação</h3>
+                                <p className="text-sm text-purple-700 mt-1">
+                                    Recebemos seu comprovante de pagamento. Nossa equipe está verificando e entrará em contato em breve.
+                                </p>
                             </div>
                         </div>
                     </div>
                 )}
-            </div>
 
-            {/* Mensalidade */}
-            <div className="card p-6 mb-6 gradient-extrema text-white">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <p className="text-white/80 text-sm mb-1">Mensalidade Recorrente</p>
-                        <p className="text-3xl font-bold">{formatCurrency(proposta.valores.mensalidade)}/mês</p>
-                        <p className="text-white/80 text-xs mt-2">Cobrada após 30 dias da assinatura</p>
-                        {proposta.reajuste && (
-                            <p className="text-white/60 text-[10px] mt-1">Reajuste: {proposta.reajuste}</p>
+                {proposta.status === 'paga' && (
+                    <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
+                        <div className="flex items-start space-x-3">
+                            <svg className="w-6 h-6 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            <div>
+                                <h3 className="text-sm font-semibold text-green-900">Pagamento Confirmado! ✓</h3>
+                                <p className="text-sm text-green-700 mt-1">
+                                    Seu pagamento foi confirmado. Em breve você receberá o contrato para assinatura.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Alerta de Expiração */}
+                {expirada && (
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+                        <div className="flex items-start space-x-3">
+                            <svg className="w-6 h-6 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                                <h3 className="text-sm font-semibold text-red-900">Proposta Expirada</h3>
+                                <p className="text-sm text-red-700 mt-1">
+                                    Esta proposta expirou em {formatDate(proposta.dataValidade, 'long')}.
+                                    Entre em contato conosco para solicitar uma nova proposta.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Alerta de Recusada */}
+                {proposta.status === 'recusada' && (
+                    <div className="bg-gray-100 border border-gray-300 rounded-xl p-4 mb-6">
+                        <div className="flex items-start space-x-3">
+                            <svg className="w-6 h-6 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            <div>
+                                <h3 className="text-sm font-semibold text-gray-900">Proposta Recusada</h3>
+                                <p className="text-sm text-gray-700 mt-1">
+                                    Esta proposta foi recusada. Se mudar de ideia, entre em contato conosco.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Produto */}
+                <div className="card p-6 mb-6">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-2">{proposta.produto.nome}</h2>
+                    <p className="text-gray-600 mb-4">{proposta.produto.descricao}</p>
+
+                    <h3 className="text-sm font-semibold text-gray-900 mb-3">Funcionalidades Incluídas:</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {proposta.produto.modulos.map((modulo, index) => (
+                            <div key={index} className="flex items-center space-x-2">
+                                <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span className="text-sm text-gray-700">{modulo}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="mt-6 pt-4 border-t border-gray-100 flex flex-wrap items-center gap-x-6 gap-y-2">
+                        <h3 className="text-sm font-semibold text-gray-900">Escopo do Projeto:</h3>
+                        <div className="flex flex-wrap gap-8 text-sm text-gray-700">
+                            <div className="flex items-center space-x-2">
+                                <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                <span>{String(proposta.produto.limites?.qtdCnpjs || '1').padStart(2, '0')} CNPJ{parseInt(String(proposta.produto.limites?.qtdCnpjs || '1')) > 1 ? 's' : ''}</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                                <span>{String(proposta.produto.limites?.qtdUsuarios || '1').padStart(2, '0')} usuário{parseInt(String(proposta.produto.limites?.qtdUsuarios || '1')) > 1 ? 's' : ''} simultâneo{parseInt(String(proposta.produto.limites?.qtdUsuarios || '1')) > 1 ? 's' : ''}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Investimento Inicial (Adesão) */}
+                <div className="card overflow-hidden mb-6">
+                    {/* Header Azul */}
+                    <div className="p-6 bg-gradient-to-r from-blue-600 to-blue-800 text-white">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-white/80 text-sm mb-1">Investimento Inicial (Adesão)</p>
+                                <p className="text-3xl font-bold">{formatCurrency(proposta.valores.investimentoInicial)}</p>
+                            </div>
+                            <svg className="w-16 h-16 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        {proposta.detalhesInvestimento && (
+                            <div className="mt-4 pt-4 border-t border-white/20">
+                                <p className="text-xs font-semibold text-white/90 mb-1">O que está incluso:</p>
+                                <p className="text-xs text-white/80 whitespace-pre-line">{proposta.detalhesInvestimento}</p>
+                            </div>
                         )}
                     </div>
-                    <svg className="w-16 h-16 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                {proposta.detalhesMensalidade && (
-                    <div className="mt-4 pt-4 border-t border-white/20">
-                        <p className="text-xs font-semibold text-white/90 mb-1">O que está incluso:</p>
-                        <p className="text-xs text-white/80 whitespace-pre-line">{proposta.detalhesMensalidade}</p>
-                    </div>
-                )}
-                {config?.textosProposta?.rodapeMensalidade && (
-                    <div className="mt-4 pt-4 border-t border-white/20">
-                        <p className="text-[10px] text-white/70 whitespace-pre-line">{config.textosProposta.rodapeMensalidade}</p>
-                    </div>
-                )}
-            </div>
 
-            {/* Condições de Pagamento - Investimento Inicial */}
-            <div className="card p-6 mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">💼 Condições - Investimento Inicial</h3>
-                <p className="text-gray-700 whitespace-pre-wrap">{proposta.condicoesPagamento}</p>
-            </div>
+                    {/* Opções de Pagamento */}
+                    <div className="p-6 bg-white">
+                        <h3 className="text-sm font-semibold text-gray-700 mb-4">Condições de Pagamento</h3>
+                        <div className={`grid grid-cols-1 ${proposta.valores.parcelamento.qtdParcelas > 1 ? 'md:grid-cols-2' : ''} gap-4`}>
+                            {/* À Vista */}
+                            <div className="p-4 border-2 border-green-200 bg-green-50 rounded-lg">
+                                <div className="flex items-start justify-between mb-3">
+                                    <h4 className="text-base font-semibold text-gray-900">Pagamento à Vista</h4>
+                                    <span className="badge bg-green-600 text-white text-xs">-{proposta.valores.descontoAvistaPercentual}%</span>
+                                </div>
+                                <div className="space-y-1 text-sm">
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">Valor original:</span>
+                                        <span className="line-through text-gray-500">{formatCurrency(proposta.valores.investimentoInicial)}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">Desconto:</span>
+                                        <span className="text-green-600">-{formatCurrency(proposta.valores.descontoAvistaValor)}</span>
+                                    </div>
+                                    <div className="border-t border-green-300 pt-2 mt-2">
+                                        <div className="flex justify-between items-center">
+                                            <span className="font-semibold text-gray-900">Valor final:</span>
+                                            <span className="text-xl font-bold text-green-600">{formatCurrency(proposta.valores.valorAvista)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-            {/* Condições de Pagamento - Mensalidade */}
-            <div className="card p-6 mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">📅 Condições - Mensalidade Recorrente</h3>
-                <ul className="space-y-2 text-gray-700">
-                    <li>• Cobrança mensal via boleto ou PIX</li>
-                    <li>• Início da cobrança: 30 dias após a assinatura</li>
-                    {proposta.reajuste && <li>• Reajuste: {proposta.reajuste}</li>}
-                </ul>
-            </div>
-
-            {/* Ações */}
-            {
-                podeAceitar && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <button
-                            onClick={() => setShowAceiteModal(true)}
-                            className="btn btn-primary py-4 text-base"
-                        >
-                            ✓ Aceitar Proposta
-                        </button>
-                        <div className="relative">
-                            <button
-                                onClick={() => setShowPdfMenu(!showPdfMenu)}
-                                className="btn btn-outline py-4 text-base disabled:opacity-50 w-full flex items-center justify-center space-x-2"
-                                disabled={gerandoPDF}
-                            >
-                                <span>📄 Baixar PDF</span>
-                                <svg className={`w-4 h-4 ml-1 transition-transform ${showPdfMenu ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </button>
-
-                            {/* Backdrop para fechar ao clicar fora */}
-                            {showPdfMenu && (
-                                <div
-                                    className="fixed inset-0 z-10"
-                                    onClick={() => setShowPdfMenu(false)}
-                                />
+                            {/* Parcelado */}
+                            {proposta.valores.parcelamento.qtdParcelas > 1 && (
+                                <div className="p-4 border border-gray-200 bg-gray-50 rounded-lg">
+                                    <h4 className="text-base font-semibold text-gray-900 mb-3">Pagamento Parcelado</h4>
+                                    <div className="space-y-1 text-sm">
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">Número de parcelas:</span>
+                                            <span className="font-semibold text-gray-900">{proposta.valores.parcelamento.qtdParcelas}x sem juros</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">Valor da parcela:</span>
+                                            <span className="font-semibold text-gray-900">{formatCurrency(proposta.valores.parcelamento.valorParcela)}</span>
+                                        </div>
+                                        <div className="border-t border-gray-200 pt-2 mt-2">
+                                            <div className="flex justify-between items-center">
+                                                <span className="font-semibold text-gray-900">Valor total:</span>
+                                                <span className="text-xl font-bold text-extrema-purple">{formatCurrency(proposta.valores.parcelamento.valorTotal)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             )}
+                        </div>
+                    </div>
+                </div>
 
-                            {/* Dropdown Menu */}
-                            {showPdfMenu && (
-                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 border border-gray-100">
-                                    <button
-                                        onClick={() => {
-                                            handleBaixarPDF(false);
-                                            setShowPdfMenu(false);
-                                        }}
-                                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                    >
-                                        Proposta Original
-                                    </button>
-                                    {proposta.aceite && (
+                {/* Mensalidade */}
+                <div className="card p-6 mb-6 gradient-extrema text-white">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-white/80 text-sm mb-1">Mensalidade Recorrente</p>
+                            <p className="text-3xl font-bold">{formatCurrency(proposta.valores.mensalidade)}/mês</p>
+                        </div>
+                        <svg className="w-16 h-16 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    {proposta.detalhesMensalidade && (
+                        <div className="mt-4 pt-4 border-t border-white/20">
+                            <p className="text-xs font-semibold text-white/90 mb-1">Observações:</p>
+                            <p className="text-xs text-white/80 whitespace-pre-line">
+                                {proposta.detalhesMensalidade?.split('\n').filter(line => !line.trim().startsWith('Investimento em mensalidade para')).join('\n').trim()}
+                            </p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Ações */}
+                {
+                    podeAceitar && (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <button
+                                onClick={() => setShowAceiteModal(true)}
+                                className="btn btn-primary py-4 text-base"
+                            >
+                                ✓ Aceitar Proposta
+                            </button>
+                            <div className="relative">
+                                <button
+                                    onClick={() => setShowPdfMenu(!showPdfMenu)}
+                                    className="btn btn-outline py-4 text-base disabled:opacity-50 w-full flex items-center justify-center space-x-2"
+                                    disabled={gerandoPDF}
+                                >
+                                    <span>📄 Baixar PDF</span>
+                                    <svg className={`w-4 h-4 ml-1 transition-transform ${showPdfMenu ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+
+                                {/* Backdrop para fechar ao clicar fora */}
+                                {showPdfMenu && (
+                                    <div
+                                        className="fixed inset-0 z-10"
+                                        onClick={() => setShowPdfMenu(false)}
+                                    />
+                                )}
+
+                                {/* Dropdown Menu */}
+                                {showPdfMenu && (
+                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 border border-gray-100">
                                         <button
                                             onClick={() => {
-                                                handleBaixarPDF(true);
+                                                handleBaixarPDF(false);
                                                 setShowPdfMenu(false);
                                             }}
                                             className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                         >
-                                            Proposta com Aceite
+                                            Proposta Original
                                         </button>
-                                    )}
-                                </div>
+                                        {proposta.aceite && (
+                                            <button
+                                                onClick={() => {
+                                                    handleBaixarPDF(true);
+                                                    setShowPdfMenu(false);
+                                                }}
+                                                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                            >
+                                                Proposta com Aceite
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                            <button
+                                onClick={handleRecusar}
+                                className="btn btn-ghost py-4 text-base text-red-600 hover:bg-red-50"
+                            >
+                                ✗ Recusar
+                            </button>
+                        </div>
+                    )
+                }
+
+                {/* Botão PDF quando não pode aceitar */}
+                {
+                    !podeAceitar && (
+                        <div className="flex justify-center mb-6">
+                            <button
+                                onClick={() => handleBaixarPDF(false)}
+                                disabled={gerandoPDF}
+                                className="btn btn-outline py-3 px-8 disabled:opacity-50"
+                            >
+                                {gerandoPDF ? '⏳ Gerando...' : '📄 Baixar PDF da Proposta'}
+                            </button>
+                            {proposta.aceite && (
+                                <button
+                                    onClick={() => handleBaixarPDF(true)}
+                                    disabled={gerandoPDF}
+                                    className="btn btn-outline py-3 px-8 ml-4 disabled:opacity-50"
+                                >
+                                    {gerandoPDF ? '⏳...' : '📄 Baixar Comprovante/Aceite'}
+                                </button>
                             )}
                         </div>
-                        <button
-                            onClick={handleRecusar}
-                            className="btn btn-ghost py-4 text-base text-red-600 hover:bg-red-50"
-                        >
-                            ✗ Recusar
-                        </button>
-                    </div>
-                )
-            }
+                    )
+                }
 
-            {/* Botão PDF quando não pode aceitar */}
-            {
-                !podeAceitar && (
-                    <div className="flex justify-center mb-6">
-                        <button
-                            onClick={() => handleBaixarPDF(false)}
-                            disabled={gerandoPDF}
-                            className="btn btn-outline py-3 px-8 disabled:opacity-50"
-                        >
-                            {gerandoPDF ? '⏳ Gerando...' : '📄 Baixar PDF da Proposta'}
-                        </button>
-                        {proposta.aceite && (
-                            <button
-                                onClick={() => handleBaixarPDF(true)}
-                                disabled={gerandoPDF}
-                                className="btn btn-outline py-3 px-8 ml-4 disabled:opacity-50"
-                            >
-                                {gerandoPDF ? '⏳...' : '📄 Baixar Comprovante/Aceite'}
-                            </button>
-                        )}
+                {/* Footer com Contato */}
+                <div className="card p-6 text-center">
+                    <h3 className="font-semibold text-gray-900 mb-2">Dúvidas sobre esta proposta?</h3>
+                    <p className="text-sm text-gray-600 mb-4">Entre em contato conosco</p>
+                    <div className="flex flex-wrap justify-center gap-4 text-sm">
+                        <a href="mailto:comercial@extrematecnologia.com.br" className="text-extrema-purple hover:underline">
+                            📧 comercial@extrematecnologia.com.br
+                        </a>
+                        <a href="https://api.whatsapp.com/send?phone=5547996818985" target="_blank" className="flex items-center text-extrema-purple hover:underline">
+                            <svg className="w-5 h-5 text-[#25D366] mr-1" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.008-.57-.008-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+                            </svg>
+                            (47) 99681-8985
+                        </a>
                     </div>
-                )
-            }
-
-            {/* Footer com Contato */}
-            <div className="card p-6 text-center">
-                <h3 className="font-semibold text-gray-900 mb-2">Dúvidas sobre esta proposta?</h3>
-                <p className="text-sm text-gray-600 mb-4">Entre em contato com {proposta.vendedorNome}</p>
-                <div className="flex flex-wrap justify-center gap-4 text-sm">
-                    <a href="mailto:comercial@extrematecnologia.com.br" className="text-extrema-purple hover:underline">
-                        📧 comercial@extrematecnologia.com.br
-                    </a>
-                    <a href="https://api.whatsapp.com/send?phone=5547996818985" className="text-extrema-purple hover:underline">
-                        📱 (47) 99681-8985
-                    </a>
                 </div>
-            </div>
 
-            {/* Footer Extrema */}
-            <div className="text-center mt-8 text-sm text-gray-500">
-                <p>© 2026 Extrema Software de Gestão Empresarial</p>
-                <p className="mt-1">São Bento do Sul-SC | Balneário Piçarras-SC</p>
-            </div>
-            {/* Modal de Aceite */}
-            {
-                showAceiteModal && proposta && (
-                    <AceiteForm
-                        proposta={proposta}
-                        onClose={() => setShowAceiteModal(false)}
-                        onSuccess={handleAceiteSuccess}
-                    />
-                )
-            }
+                {/* Slogan */}
+                <div className="flex justify-center mt-8 mb-4">
+                    <div className="relative w-96 h-24">
+                        <Image
+                            src="/images/slogan.png"
+                            alt="Extrema Tecnologia"
+                            fill
+                            className="object-contain"
+                        />
+                    </div>
+                </div>
+
+                {/* Footer Extrema */}
+                <div className="text-center mt-8 text-sm text-gray-500">
+                    <p>© 2026 Extrema Software de Gestão Empresarial</p>
+                    <p className="mt-1">São Bento do Sul-SC | Balneário Piçarras-SC</p>
+                </div>
+                {/* Modal de Aceite */}
+                {
+                    showAceiteModal && proposta && (
+                        <AceiteForm
+                            proposta={proposta}
+                            onClose={() => setShowAceiteModal(false)}
+                            onSuccess={handleAceiteSuccess}
+                        />
+                    )
+                }
+
+            </div >
         </div >
     );
 }

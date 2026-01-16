@@ -300,33 +300,20 @@ export async function gerarPDFProposta(proposta: Proposta, options?: { comAceite
         doc.setFont('helvetica', 'bold');
         doc.text(`${formatCurrency(proposta.valores.mensalidade)}/mês`, margin + 5, yPos + 20);
 
-        doc.setFontSize(8);
-        doc.setFont('helvetica', 'normal');
-        const mensalidadeInfo = 'Cobrada após 30 dias da assinatura';
-        doc.text(mensalidadeInfo, pageWidth - margin - doc.getTextWidth(mensalidadeInfo) - 5, yPos + 15);
-
-        // Detalhes da Mensalidade e Reajuste
+        // Detalhes da Mensalidade
         yPos += 30;
 
-        if (proposta.detalhesMensalidade || proposta.reajuste) {
+        if (proposta.detalhesMensalidade) {
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(9);
             doc.setTextColor(...COLORS.gray);
 
             let currentY = yPos;
 
-            if (proposta.detalhesMensalidade) {
-                doc.text('Incluso na mensalidade:', margin, currentY);
-                const mensalDetailsParams = doc.splitTextToSize(proposta.detalhesMensalidade, pageWidth - 2 * margin);
-                doc.text(mensalDetailsParams, margin, currentY + 5);
-                currentY += mensalDetailsParams.length * 4 + 8;
-            }
-
-            if (proposta.reajuste) {
-                doc.setFont('helvetica', 'bold');
-                doc.text(`Reajuste: ${proposta.reajuste}`, margin, currentY);
-                currentY += 8;
-            }
+            doc.text('Incluso na mensalidade:', margin, currentY);
+            const mensalDetailsParams = doc.splitTextToSize(proposta.detalhesMensalidade, pageWidth - 2 * margin);
+            doc.text(mensalDetailsParams, margin, currentY + 5);
+            currentY += mensalDetailsParams.length * 4 + 8;
 
             yPos = currentY + 10;
         } else {
