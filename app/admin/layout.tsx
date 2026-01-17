@@ -5,6 +5,8 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 
+import Image from 'next/image';
+
 // Links de navegação principal
 const navLinks = [
     { href: '/admin/propostas', label: 'Propostas', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
@@ -63,8 +65,13 @@ export default function AdminLayout({
                                 className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
                                 title="Ir para o Dashboard"
                             >
-                                <div className="gradient-extrema w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-xl">
-                                    E
+                                <div className=" relative w-10 h-10 rounded-lg overflow-hidden">
+                                    <Image
+                                        src="/logo-small.png"
+                                        alt="Logo Extrema"
+                                        fill
+                                        className="object-contain"
+                                    />
                                 </div>
                                 <div className="hidden sm:block">
                                     <h1 className="text-lg font-semibold text-gray-900">
