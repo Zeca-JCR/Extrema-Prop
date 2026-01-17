@@ -245,5 +245,9 @@ export function gerarDescricaoCondicoes(
 
     // Caso 2: Parcelado
     const valorParcelaFormatado = formatCurrency(valorParcela);
-    return `Entrada via PIX + ${qtdParcelas} boletos de ${valorParcelaFormatado} (30, 60${qtdParcelas > 2 ? '...' : ''} dias).\nTotalizando ${valorInvestimentoFormatado}.\n\nMensalidade de ${formatCurrency(mensalidade)} iniciada após 30 dias da assinatura.`;
+    const qtdBoletos = qtdParcelas - 1;
+    const diasDesc = qtdBoletos === 1 ? '30 dias' : `30, 60${qtdBoletos > 2 ? '...' : ''} dias`;
+    const labelBoletos = qtdBoletos === 1 ? 'boleto' : 'boletos';
+
+    return `Entrada via PIX + ${qtdBoletos} ${labelBoletos} de ${valorParcelaFormatado} (${diasDesc}).\nTotalizando ${valorInvestimentoFormatado}.\n\nMensalidade de ${formatCurrency(mensalidade)} iniciada após 30 dias da assinatura.`;
 }

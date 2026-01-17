@@ -276,10 +276,11 @@ export default function PropostaPublica() {
                                         <span className="text-green-600">-{formatCurrency(proposta.valores.descontoAvistaValor)}</span>
                                     </div>
                                     <div className="border-t border-green-300 pt-2 mt-2">
-                                        <div className="flex justify-between items-center">
+                                        <div className="flex justify-between items-center mb-1">
                                             <span className="font-semibold text-gray-900">Valor final:</span>
                                             <span className="text-xl font-bold text-green-600">{formatCurrency(proposta.valores.valorAvista)}</span>
                                         </div>
+                                        <p className="text-xs text-green-700 text-right">Pagamento via Pix.</p>
                                     </div>
                                 </div>
                             </div>
@@ -298,10 +299,11 @@ export default function PropostaPublica() {
                                             <span className="font-semibold text-gray-900">{formatCurrency(proposta.valores.parcelamento.valorParcela)}</span>
                                         </div>
                                         <div className="border-t border-gray-200 pt-2 mt-2">
-                                            <div className="flex justify-between items-center">
+                                            <div className="flex justify-between items-center mb-1">
                                                 <span className="font-semibold text-gray-900">Valor total:</span>
                                                 <span className="text-xl font-bold text-extrema-purple">{formatCurrency(proposta.valores.parcelamento.valorTotal)}</span>
                                             </div>
+                                            <p className="text-xs text-gray-600 text-right">Primeira parcela via Pix.</p>
                                         </div>
                                     </div>
                                 </div>

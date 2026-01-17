@@ -69,7 +69,24 @@ export async function gerarPDFProposta(proposta: Proposta, options?: { comAceite
         doc.text('CNPJ: 18.866.315/0001-81', margin, yPos + 5);
         doc.text('comercial@extrematecnologia.com.br | (47) 99681-8985', margin, yPos + 10);
 
-        yPos += 25;
+        yPos += 20;
+
+        // ==================== INTRODUÇÃO ====================
+        if (config?.textosProposta?.introducao) {
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            doc.setTextColor(...COLORS.black);
+
+            const saudacao = proposta.cliente.saudacao || 'Prezado(a)';
+            doc.text(`${saudacao} ${proposta.cliente.contato},`, margin, yPos);
+            yPos += 7;
+
+            const introLines = doc.splitTextToSize(config.textosProposta.introducao, pageWidth - 2 * margin);
+            doc.text(introLines, margin, yPos);
+            yPos += introLines.length * 5 + 15;
+        } else {
+            yPos += 10;
+        }
 
         // ==================== DADOS DO CLIENTE ====================
         doc.setFillColor(...COLORS.lightGray);
@@ -161,7 +178,15 @@ export async function gerarPDFProposta(proposta: Proposta, options?: { comAceite
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(...COLORS.gray);
 
+        const checkPageBreak = (heightNeeded: number = 0) => {
+            if (yPos + heightNeeded > pageHeight - 35) {
+                doc.addPage();
+                yPos = 20; // Margem superior da nova página
+            }
+        };
+
         proposta.produto.modulos.forEach((modulo, index) => {
+            checkPageBreak(10); // Verificar espaço para o próximo item
             doc.setFillColor(...COLORS.green);
             doc.circle(margin + 3, yPos + 1, 1.5, 'F');
             doc.text(modulo, margin + 8, yPos + 3);
@@ -169,6 +194,7 @@ export async function gerarPDFProposta(proposta: Proposta, options?: { comAceite
         });
 
         yPos += 10;
+        checkPageBreak(60); // Verificar espaço para o header e tabela de valores
 
 
         // ==================== VALORES ====================
@@ -180,10 +206,21 @@ export async function gerarPDFProposta(proposta: Proposta, options?: { comAceite
         doc.setFont('helvetica', 'bold');
         doc.text('INVESTIMENTO', margin + 5, yPos + 6);
 
-        yPos += 15;
+        // Tabela de valores
 
-        // Tabela de valores
-        // Tabela de valores
+        // Detalhes do Investimento (agora antes dos valores)
+        if (proposta.detalhesInvestimento) {
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            doc.setTextColor(...COLORS.gray);
+            doc.text('Incluso no investimento:', margin, yPos);
+            yPos += 5;
+
+            const investmentDetailsParams = doc.splitTextToSize(proposta.detalhesInvestimento, pageWidth - 2 * margin);
+            doc.text(investmentDetailsParams, margin, yPos);
+            yPos += investmentDetailsParams.length * 4 + 10;
+        }
+
         const isParcelado = proposta.valores.parcelamento.qtdParcelas > 1;
 
         if (isParcelado) {
@@ -191,7 +228,7 @@ export async function gerarPDFProposta(proposta: Proposta, options?: { comAceite
 
             // Coluna À Vista
             doc.setFillColor(236, 253, 245); // green-50
-            doc.rect(margin, yPos, colWidth, 45, 'F');
+            doc.rect(margin, yPos, colWidth, 50, 'F'); // Aumentado altura para caber msg PIX
 
             doc.setTextColor(...COLORS.black);
             doc.setFontSize(11);
@@ -215,10 +252,17 @@ export async function gerarPDFProposta(proposta: Proposta, options?: { comAceite
             doc.setFont('helvetica', 'bold');
             doc.text(`${formatCurrency(proposta.valores.valorAvista)}`, margin + 5, yPos + 38);
 
+            // PIX msg
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(...COLORS.green); // green-700 approx
+            doc.text('Pagamento via Pix.', margin + colWidth - 5, yPos + 46, { align: 'right' });
+
+
             // Coluna Parcelado
             const col2X = margin + colWidth + 10;
             doc.setFillColor(...COLORS.lightGray);
-            doc.rect(col2X, yPos, colWidth, 45, 'F');
+            doc.rect(col2X, yPos, colWidth, 50, 'F');
 
             doc.setTextColor(...COLORS.black);
             doc.setFontSize(11);
@@ -235,12 +279,19 @@ export async function gerarPDFProposta(proposta: Proposta, options?: { comAceite
             doc.setFontSize(14);
             doc.setFont('helvetica', 'bold');
             doc.text(`${formatCurrency(proposta.valores.parcelamento.valorTotal)}`, col2X + 5, yPos + 38);
+
+            // PIX msg
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(...COLORS.gray);
+            doc.text('Primeira parcela via Pix.', col2X + colWidth - 5, yPos + 46, { align: 'right' });
+
         } else {
             // Pagamento somente à vista - Layout Centralizado/Unificado
             const colWidth = pageWidth - 2 * margin; // Largura total
 
             doc.setFillColor(236, 253, 245); // green-50
-            doc.rect(margin, yPos, colWidth, 45, 'F');
+            doc.rect(margin, yPos, colWidth, 50, 'F');
 
             doc.setTextColor(...COLORS.black);
             doc.setFontSize(11);
@@ -248,8 +299,8 @@ export async function gerarPDFProposta(proposta: Proposta, options?: { comAceite
             doc.text('Pagamento à Vista', margin + 5, yPos + 8);
 
             doc.setFillColor(...COLORS.green);
-            // Ajustar badge para ficar mais à direita, mas não no extremo canto se for full width
-            doc.roundedRect(margin + 150, yPos + 3, 20, 7, 1, 1, 'F'); // Posição fixa relativa
+            // Ajustar badge para ficar mais à direita
+            doc.roundedRect(margin + 150, yPos + 3, 20, 7, 1, 1, 'F');
             doc.setTextColor(...COLORS.white);
             doc.setFontSize(8);
             doc.text(`-${proposta.valores.descontoAvistaPercentual}%`, margin + 153, yPos + 8);
@@ -259,7 +310,6 @@ export async function gerarPDFProposta(proposta: Proposta, options?: { comAceite
             doc.setFont('helvetica', 'normal');
 
             // Layout horizontal para À Vista Full Width
-            // Coluna 1: Labels
             doc.text(`Valor original: ${formatCurrency(proposta.valores.investimentoInicial)}`, margin + 5, yPos + 18);
             doc.text(`Desconto: -${formatCurrency(proposta.valores.descontoAvistaValor)}`, margin + 5, yPos + 25);
 
@@ -270,22 +320,17 @@ export async function gerarPDFProposta(proposta: Proposta, options?: { comAceite
             doc.text(`${formatCurrency(proposta.valores.valorAvista)}`, margin + colWidth - 55, yPos + 30);
             doc.setFontSize(9);
             doc.text('Valor Final', margin + colWidth - 55, yPos + 18);
-        }
 
-        // Detalhes do Investimento (se houver)
-        if (proposta.detalhesInvestimento) {
-            yPos += 1;
+            // PIX msg
+            doc.setFontSize(8);
             doc.setFont('helvetica', 'normal');
-            doc.setFontSize(9);
-            doc.setTextColor(...COLORS.gray);
-            doc.text('Incluso no investimento:', margin, yPos);
-
-            const investmentDetailsParams = doc.splitTextToSize(proposta.detalhesInvestimento, pageWidth - 2 * margin);
-            doc.text(investmentDetailsParams, margin, yPos + 5);
-            yPos += investmentDetailsParams.length * 4 + 5;
+            doc.setTextColor(...COLORS.green);
+            doc.text('Pagamento via Pix.', margin + colWidth - 5, yPos + 46, { align: 'right' });
         }
 
-        yPos += 50;
+
+
+        yPos += 60; // Espaço dos cards (50) + margem (10)
 
         // ==================== MENSALIDADE ====================
         doc.setFillColor(...COLORS.purple);
@@ -403,26 +448,34 @@ export async function gerarPDFProposta(proposta: Proposta, options?: { comAceite
             }
         }
 
-        // ==================== FOOTER ====================
+        // ==================== FOOTER (EM TODAS AS PÁGINAS) ====================
+        const pageCount = doc.getNumberOfPages();
         const footerY = doc.internal.pageSize.getHeight() - 25;
 
-        doc.setDrawColor(...COLORS.purple);
-        doc.setLineWidth(0.5);
-        doc.line(margin, footerY, pageWidth - margin, footerY);
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
 
-        doc.setTextColor(...COLORS.gray);
-        doc.setFontSize(8);
-        doc.setFont('helvetica', 'normal');
+            doc.setDrawColor(...COLORS.purple);
+            doc.setLineWidth(0.5);
+            doc.line(margin, footerY, pageWidth - margin, footerY);
 
-        const footerText1 = 'Extrema Software de Gestão Empresarial | São Bento do Sul-SC | Balneário Piçarras-SC';
-        const footerText2 = 'comercial@extrematecnologia.com.br | (47) 99681-8985 | (47) 3633-4255';
+            doc.setTextColor(...COLORS.gray);
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
 
-        doc.text(footerText1, pageWidth / 2, footerY + 8, { align: 'center' });
-        doc.text(footerText2, pageWidth / 2, footerY + 14, { align: 'center' });
+            const footerText1 = 'Extrema Software de Gestão Empresarial | São Bento do Sul-SC | Balneário Piçarras-SC';
+            const footerText2 = 'comercial@extrematecnologia.com.br | (47) 99681-8985 | (47) 3633-4255';
+
+            doc.text(footerText1, pageWidth / 2, footerY + 8, { align: 'center' });
+            doc.text(footerText2, pageWidth / 2, footerY + 14, { align: 'center' });
+
+            // Opcional: Número da página
+            // doc.text(`Página ${i} de ${pageCount}`, pageWidth - margin, footerY + 8, { align: 'right' });
+        }
 
         // ==================== DOWNLOAD ====================
-        const suffix = options?.comAceite ? '_ACEITA' : '';
-        const fileName = `Proposta_${proposta.numero}_${proposta.cliente.empresa.replace(/\s+/g, '_')}${suffix}.pdf`;
+        const suffix = options?.comAceite ? ' - ACEITA' : '';
+        const fileName = `Proposta Comercial - ${proposta.produto.nome} - ${proposta.cliente.empresa} (${proposta.numero})${suffix}.pdf`;
 
         console.log('✅ Salvando PDF:', fileName);
         doc.save(fileName);
