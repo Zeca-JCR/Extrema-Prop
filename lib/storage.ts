@@ -89,6 +89,7 @@ export interface Aceite {
     pixPayload: string;
     dadosCadastrais: DadosCadastrais;
     comprovante: Comprovante | null;
+    responsavelAceite?: string; // Nome de quem aceitou (se diferente do responsável legal)
 }
 
 export type StatusProposta =
@@ -127,8 +128,7 @@ export interface Proposta {
     detalhesInvestimento?: string; // O que está incluso no setup
     detalhesMensalidade?: string;  // O que está incluso na mensalidade
 
-    // Condições
-    condicoesPagamento: string;
+
     validadeDias: number;
     dataValidade: string; // ISO Date
     observacoes: string;
@@ -143,7 +143,7 @@ export interface Template {
     vendedorId: string | null; // null = template global
     produto: Produto;
     valores: Omit<Valores, 'descontoAvistaValor' | 'valorAvista'>;
-    condicoesPagamento: string;
+
     // Detalhamento Padrão
     detalhesInvestimento?: string;
     detalhesMensalidade?: string;
@@ -458,8 +458,7 @@ export const seedInitialData = (): void => {
                 },
                 mensalidade: 199.9,
             },
-            condicoesPagamento:
-                'Entrada via PIX + 2 boletos (30 e 60 dias). Mensalidade cobrada após 30 dias da assinatura.',
+
             detalhesInvestimento: 'Instalação remota, Configuração inicial, Treinamento online (4 horas).',
             detalhesMensalidade: 'Licença de uso, Suporte técnico (seg-sex 08h às 18h), Atualizações fiscais.',
             createdAt: new Date().toISOString(),

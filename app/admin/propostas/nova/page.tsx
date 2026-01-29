@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { saveProposta, incrementarNumeroProposta, getTemplates } from '@/lib/storage';
-import { generateHash, generatePropostaNumero, calcularDescontoAvista, calcularDataValidade, gerarDescricaoCondicoes } from '@/lib/utils';
+import { generateHash, generatePropostaNumero, calcularDescontoAvista, calcularDataValidade } from '@/lib/utils';
 import type { Proposta, Template } from '@/lib/storage';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -50,9 +50,21 @@ export default function NovaProposta() {
 * Concede direito as atualizações de versão do sistema (regras de negócio, alterações legais/legislação) e suporte técnico via telefone, e-mail e whatsapp. Este valor é reajustado anualmente pelo IGP-M ou por outro índice que venha a substituí-lo.`);
 
     // Condições
-    const [condicoesPagamento, setCondicoesPagamento] = useState('');
+
     const [validadeDias, setValidadeDias] = useState('15');
     const [observacoes, setObservacoes] = useState('');
+
+    // Alertar sobre mudanças não salvas ao fechar/recarregar
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            e.preventDefault();
+            e.returnValue = '';
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, []);
 
     // Cálculo automático do valor da parcela
     useEffect(() => {
@@ -69,18 +81,7 @@ export default function NovaProposta() {
 
     // Atualização automática das condições (apenas se não estiver bloqueado ou se o usuário quiser)
     // Para simplificar "pra ver", vamos atualizar sempre que os valores mudarem se a etapa for 'valores' ou anterior
-    useEffect(() => {
-        if (investimentoInicial && qtdParcelas && mensalidade) {
-            const inv = parseFloat(investimentoInicial);
-            const parc = parseInt(qtdParcelas);
-            const valParc = parseFloat(valorParcela);
-            const mens = parseFloat(mensalidade);
 
-            if (!isNaN(inv) && !isNaN(parc) && !isNaN(mens)) {
-                setCondicoesPagamento(gerarDescricaoCondicoes(inv, parc, valParc, mens));
-            }
-        }
-    }, [investimentoInicial, qtdParcelas, valorParcela, mensalidade]);
 
 
 
@@ -94,7 +95,7 @@ export default function NovaProposta() {
         setQtdParcelas(template.valores.parcelamento.qtdParcelas.toString());
         setValorParcela(template.valores.parcelamento.valorParcela.toString());
         setMensalidade(template.valores.mensalidade.toString());
-        setCondicoesPagamento(template.condicoesPagamento);
+
         setQtdParcelas(template.valores.parcelamento.qtdParcelas.toString());
         setValorParcela(template.valores.parcelamento.valorParcela.toString());
         setMensalidade(template.valores.mensalidade.toString());
@@ -104,7 +105,7 @@ export default function NovaProposta() {
             limpaDetalhes = limpaDetalhes.split('\n').filter(line => !line.trim().startsWith('Investimento em mensalidade para')).join('\n').trim();
         }
         setDetalhesMensalidade(limpaDetalhes);
-        setCondicoesPagamento(template.condicoesPagamento);
+
         // Default limits if not in template (backward compatibility)
         setQtdCnpjs(template.produto.limites?.qtdCnpjs?.toString() || '1');
         setQtdUsuarios(template.produto.limites?.qtdUsuarios?.toString() || '1');
@@ -240,7 +241,7 @@ export default function NovaProposta() {
                 },
                 mensalidade: parseFloat(mensalidade),
             },
-            condicoesPagamento,
+
             detalhesInvestimento,
             detalhesMensalidade,
             validadeDias: parseInt(validadeDias),
@@ -707,17 +708,7 @@ export default function NovaProposta() {
                 <div className="card p-6">
                     <h2 className="text-lg font-semibold text-gray-900 mb-4">Condições e Finalização</h2>
                     <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Condições de Pagamento *</label>
-                            <textarea
-                                value={condicoesPagamento}
-                                onChange={(e) => setCondicoesPagamento(e.target.value)}
-                                className="input"
-                                rows={4}
-                                placeholder="Ex: Entrada via PIX + 2 boletos (30 e 60 dias). Mensalidade cobrada após 30 dias da assinatura."
-                                required
-                            />
-                        </div>
+
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Validade (dias) *</label>
                             <select
@@ -766,7 +757,7 @@ export default function NovaProposta() {
                         <button
                             onClick={criarProposta}
                             className="btn btn-primary"
-                            disabled={!condicoesPagamento}
+                            disabled={false}
                         >
                             ✓ Criar Proposta
                         </button>

@@ -20,6 +20,31 @@ export default function PropostaPublica() {
     const [showPdfMenu, setShowPdfMenu] = useState(false);
     const [gerandoPDF, setGerandoPDF] = useState(false);
 
+    const [showStickyFooter, setShowStickyFooter] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const actionsSection = document.getElementById('acoes-principais');
+            if (actionsSection) {
+                const rect = actionsSection.getBoundingClientRect();
+                // Mostrar footer quando a seção de ações principais sair da tela (rolando para cima ou ainda não chegou)
+                // Na verdade, queremos mostrar quando NÃO estamos vendo os botões principais.
+                // Mas, por simplicidade e conversão, vamos mostrar SEMPRE que houver rolagem suficiente,
+                // ou ocultar quando os botões principais estiverem visíveis na viewport.
+                const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
+                setShowStickyFooter(!isVisible);
+            } else {
+                // Se não achou a seção (ex: carregando), não mostra
+                setShowStickyFooter(false);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        // Check inicial
+        handleScroll();
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [proposta, loading]);
+
     useEffect(() => {
         if (hash) {
             const fetchProposta = () => {
@@ -144,6 +169,43 @@ export default function PropostaPublica() {
                         </div>
                     </div>
                 )}
+
+                {/* Trust Bar (Prova Social) */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 animate-fade-in-up delay-200">
+                    <div className="bg-white p-4 rounded-xl border border-gray-100 flex items-center justify-center space-x-3 shadow-sm">
+                        <div className="bg-purple-100 p-2 rounded-full">
+                            <svg className="w-5 h-5 text-extrema-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                            </svg>
+                        </div>
+                        <div className="text-left">
+                            <p className="font-bold text-gray-900 text-sm leading-tight">+12 Anos</p>
+                            <p className="text-xs text-gray-500">de experiência no mercado</p>
+                        </div>
+                    </div>
+                    <div className="bg-white p-4 rounded-xl border border-gray-100 flex items-center justify-center space-x-3 shadow-sm">
+                        <div className="bg-blue-100 p-2 rounded-full">
+                            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                        </div>
+                        <div className="text-left">
+                            <p className="font-bold text-gray-900 text-sm leading-tight">Suporte Especializado</p>
+                            <p className="text-xs text-gray-500">Administrativo, Contábil e Tributário</p>
+                        </div>
+                    </div>
+                    <div className="bg-white p-4 rounded-xl border border-gray-100 flex items-center justify-center space-x-3 shadow-sm">
+                        <div className="bg-green-100 p-2 rounded-full">
+                            <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div className="text-left">
+                            <p className="font-bold text-gray-900 text-sm leading-tight">Software Homologado</p>
+                            <p className="text-xs text-gray-500">Segurança e Confiabilidade</p>
+                        </div>
+                    </div>
+                </div>
 
                 {/* Alerta de Status Especial */}
                 {proposta.status === 'comprovante_enviado' && (
@@ -360,13 +422,19 @@ export default function PropostaPublica() {
                 {/* Ações */}
                 {
                     podeAceitar && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 animate-fade-in-up delay-400">
+                        <div id="acoes-principais" className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 animate-fade-in-up delay-400">
                             <button
                                 onClick={() => setShowAceiteModal(true)}
                                 className="btn-modern bg-[#8B4FD3] text-white py-5 text-lg hover:bg-[#7640B8] shadow-lg shadow-purple-500/30 w-full transition-all"
                             >
                                 {proposta.status === 'aguardando_pagamento' ? '💳 Realizar Pagamento' : '✓ Aceitar Proposta'}
                             </button>
+                            <div className="mt-3 flex items-center justify-center gap-2 text-xs text-gray-500">
+                                <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                                <span className="font-medium">Empresa Referência em Tecnologia</span>
+                            </div>
                             <div className="relative">
                                 <button
                                     onClick={() => setShowPdfMenu(!showPdfMenu)}
@@ -492,6 +560,36 @@ export default function PropostaPublica() {
 
                     </div>
                 </footer>
+
+                {/* Sticky Footer CTA */}
+                {podeAceitar && showStickyFooter && (
+                    <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-40 p-4 animate-slide-up">
+                        <div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
+                            <div className="hidden md:block">
+                                <p className="text-sm text-gray-500 uppercase font-bold tracking-wider">Valor de Adesão</p>
+                                <div className="flex items-baseline gap-2">
+                                    <span className="text-xl font-extrabold text-extrema-purple">{formatCurrency(proposta.valores.valorAvista)}</span>
+                                    <span className="text-xs text-green-600 font-bold bg-green-100 px-2 py-0.5 rounded-full">à vista</span>
+                                </div>
+                            </div>
+                            <div className="flex-1 md:flex-none flex gap-3 w-full md:w-auto">
+                                <button
+                                    onClick={() => handleBaixarPDF(false)}
+                                    className="btn-modern bg-gray-100 text-gray-700 hover:bg-gray-200 py-3 px-4 flex-1 md:flex-none text-sm font-bold"
+                                    disabled={gerandoPDF}
+                                >
+                                    {gerandoPDF ? '⏳' : '📥 PDF'}
+                                </button>
+                                <button
+                                    onClick={() => setShowAceiteModal(true)}
+                                    className="btn-modern bg-[#8B4FD3] text-white hover:bg-[#7640B8] py-3 px-6 shadow-lg shadow-purple-500/30 flex-1 md:w-64 font-bold text-sm md:text-base"
+                                >
+                                    {proposta.status === 'aguardando_pagamento' ? '💳 Pagar Agora' : '✓ Aceitar Proposta'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
                 {/* Modal de Aceite */}
                 {
                     showAceiteModal && proposta && (

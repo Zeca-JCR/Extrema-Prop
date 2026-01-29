@@ -4,7 +4,7 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { saveProposta, getTemplates, getProposta } from '@/lib/storage';
-import { calcularDescontoAvista, calcularDataValidade, gerarDescricaoCondicoes } from '@/lib/utils';
+import { calcularDescontoAvista, calcularDataValidade } from '@/lib/utils';
 import type { Proposta, Template } from '@/lib/storage';
 
 export default function EditarProposta({ params }: { params: Promise<{ id: string }> }) {
@@ -51,7 +51,7 @@ export default function EditarProposta({ params }: { params: Promise<{ id: strin
     const [detalhesMensalidade, setDetalhesMensalidade] = useState('');
 
     // Condições
-    const [condicoesPagamento, setCondicoesPagamento] = useState('');
+
     const [validadeDias, setValidadeDias] = useState('15');
     const [observacoes, setObservacoes] = useState('');
 
@@ -90,7 +90,7 @@ export default function EditarProposta({ params }: { params: Promise<{ id: strin
                 setDetalhesInvestimento(proposta.detalhesInvestimento || '');
                 setDetalhesMensalidade(proposta.detalhesMensalidade || '');
 
-                setCondicoesPagamento(proposta.condicoesPagamento);
+
                 setValidadeDias(proposta.validadeDias.toString());
                 setObservacoes(proposta.observacoes);
             } else {
@@ -100,6 +100,18 @@ export default function EditarProposta({ params }: { params: Promise<{ id: strin
             setLoading(false);
         }
     }, [id]);
+
+    // Alertar sobre mudanças não salvas ao fechar/recarregar
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            e.preventDefault();
+            e.returnValue = '';
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, []);
 
     // Cálculo automático do valor da parcela (mesma lógica da criação)
     useEffect(() => {
@@ -130,7 +142,7 @@ export default function EditarProposta({ params }: { params: Promise<{ id: strin
         setQtdParcelas(template.valores.parcelamento.qtdParcelas.toString());
         setValorParcela(template.valores.parcelamento.valorParcela.toString());
         setMensalidade(template.valores.mensalidade.toString());
-        setCondicoesPagamento(template.condicoesPagamento);
+
         setDetalhesInvestimento(template.detalhesInvestimento || '');
         let limpaDetalhes = template.detalhesMensalidade || '';
         if (limpaDetalhes.includes('Investimento em mensalidade para')) {
@@ -265,7 +277,7 @@ export default function EditarProposta({ params }: { params: Promise<{ id: strin
                 },
                 mensalidade: parseFloat(mensalidade),
             },
-            condicoesPagamento,
+
             detalhesInvestimento,
             detalhesMensalidade,
             validadeDias: parseInt(validadeDias),
@@ -717,16 +729,7 @@ export default function EditarProposta({ params }: { params: Promise<{ id: strin
                 <div className="card p-6">
                     <h2 className="text-lg font-semibold text-gray-900 mb-4">Condições e Finalização</h2>
                     <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Condições de Pagamento *</label>
-                            <textarea
-                                value={condicoesPagamento}
-                                onChange={(e) => setCondicoesPagamento(e.target.value)}
-                                className="input"
-                                rows={4}
-                                required
-                            />
-                        </div>
+
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Validade (dias) *</label>
                             <select
@@ -758,7 +761,7 @@ export default function EditarProposta({ params }: { params: Promise<{ id: strin
                         <button
                             onClick={atualizarProposta}
                             className="btn btn-primary"
-                            disabled={!condicoesPagamento}
+                            disabled={false}
                         >
                             ✓ Salvar Alterações
                         </button>

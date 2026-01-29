@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { getTemplates, saveTemplate, deleteTemplate } from '@/lib/storage';
-import { gerarDescricaoCondicoes } from '@/lib/utils';
+
 import type { Template } from '@/lib/storage';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -37,7 +37,7 @@ export default function TemplatesPage() {
     const [qtdParcelas, setQtdParcelas] = useState('3');
     const [valorParcela, setValorParcela] = useState('');
     const [mensalidade, setMensalidade] = useState('');
-    const [condicoesPagamento, setCondicoesPagamento] = useState('');
+
     const [qtdCnpjs, setQtdCnpjs] = useState('1');
     const [qtdUsuarios, setQtdUsuarios] = useState('1');
     const [detalhesInvestimento, setDetalhesInvestimento] = useState('');
@@ -53,35 +53,37 @@ export default function TemplatesPage() {
         carregarTemplates();
     }, []);
 
-    // Atualização automática do texto de condições
+    // Alertar sobre mudanças não salvas ao fechar/recarregar
     useEffect(() => {
-        if (!editando && investimentoInicial && qtdParcelas && mensalidade) {
-            const inv = parseFloat(investimentoInicial);
-            const parc = parseInt(qtdParcelas);
-            const valParc = inv / (parc || 1);
-            const mens = parseFloat(mensalidade);
-
-            if (!isNaN(inv) && !isNaN(parc) && !isNaN(mens)) {
-                setCondicoesPagamento(gerarDescricaoCondicoes(inv, parc, valParc, mens));
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (mostrarForm) {
+                e.preventDefault();
+                e.returnValue = ''; // Exibe o alerta padrão do navegador
             }
+        };
+
+        if (mostrarForm) {
+            window.addEventListener('beforeunload', handleBeforeUnload);
         }
-    }, [investimentoInicial, qtdParcelas, mensalidade, editando]);
 
-    // Auto-cálculo do valor da parcela
-    useEffect(() => {
-        if (!editando && investimentoInicial && qtdParcelas) {
-            const inv = parseFloat(investimentoInicial);
-            const parc = parseInt(qtdParcelas);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [mostrarForm]);
 
-            if (!isNaN(inv) && !isNaN(parc) && parc > 0) {
-                const val = inv / parc;
-                // Formata para 2 casas decimais para visualização no input
-                setValorParcela(val.toFixed(2));
-            }
+    // Efeito para auto-cálculo de condições removido ou mantido conforme necessidade.
+    // O useEffect de valorParcela foi substituído por cálculo direto no onChange para permitir edição.
+
+    // Atualização automática do texto de condições (apenas se não estiver editando, para evitar sobrescrever customizações)
+
+
+    // Função auxiliar para calcular valor da parcela
+    const atualizarValorParcela = (invValue: string, parcValue: string) => {
+        const inv = parseFloat(invValue);
+        const parc = parseInt(parcValue);
+
+        if (!isNaN(inv) && !isNaN(parc) && parc > 0) {
+            setValorParcela((inv / parc).toFixed(2));
         }
-    }, [investimentoInicial, qtdParcelas, editando]);
-
-
+    };
 
     const limparForm = () => {
         setNome('');
@@ -96,7 +98,7 @@ export default function TemplatesPage() {
         setQtdParcelas('3');
         setValorParcela('');
         setMensalidade('');
-        setCondicoesPagamento('');
+
         setQtdCnpjs('1');
         setQtdUsuarios('1');
         setDetalhesInvestimento('Ref. implantação, configurações iniciais e treinamento (02 agendas).');
@@ -106,6 +108,7 @@ export default function TemplatesPage() {
         setEditando(null);
         setMostrarForm(false);
     };
+
 
     const handleNovoTemplate = () => {
         limparForm();
@@ -231,7 +234,7 @@ export default function TemplatesPage() {
                 },
                 mensalidade: parseFloat(mensalidade),
             },
-            condicoesPagamento,
+
             detalhesInvestimento,
             detalhesMensalidade,
             createdAt: editando?.createdAt || new Date().toISOString(),
@@ -255,7 +258,7 @@ export default function TemplatesPage() {
         setValorParcela(template.valores.parcelamento.valorParcela.toString());
         setMensalidade(template.valores.mensalidade.toString());
         setMensalidade(template.valores.mensalidade.toString());
-        setCondicoesPagamento(template.condicoesPagamento);
+
         // Default configs
         setQtdCnpjs(template.produto.limites?.qtdCnpjs?.toString() || '1');
         setQtdUsuarios(template.produto.limites?.qtdUsuarios?.toString() || '1');
@@ -574,7 +577,10 @@ export default function TemplatesPage() {
                                     type="number"
                                     step="0.01"
                                     value={investimentoInicial}
-                                    onChange={(e) => setInvestimentoInicial(e.target.value)}
+                                    onChange={(e) => {
+                                        setInvestimentoInicial(e.target.value);
+                                        atualizarValorParcela(e.target.value, qtdParcelas);
+                                    }}
                                     className="input"
                                 />
                             </div>
@@ -593,7 +599,10 @@ export default function TemplatesPage() {
                                 <input
                                     type="number"
                                     value={qtdParcelas}
-                                    onChange={(e) => setQtdParcelas(e.target.value)}
+                                    onChange={(e) => {
+                                        setQtdParcelas(e.target.value);
+                                        atualizarValorParcela(investimentoInicial, e.target.value);
+                                    }}
                                     className="input"
                                 />
                             </div>
@@ -642,16 +651,7 @@ export default function TemplatesPage() {
 
 
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Condições de Pagamento</label>
-                            <textarea
-                                value={condicoesPagamento}
-                                onChange={(e) => setCondicoesPagamento(e.target.value)}
-                                className="input"
-                                rows={3}
-                                placeholder="Ex: Entrada via PIX + boletos..."
-                            />
-                        </div>
+
                     </div>
 
                     <div className="flex justify-between mt-6">

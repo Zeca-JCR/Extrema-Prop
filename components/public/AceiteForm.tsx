@@ -77,8 +77,104 @@ export default function AceiteForm({ proposta, onClose, onSuccess }: AceiteFormP
     const [contabilidadeContato, setContabilidadeContato] = useState('');
     const [contabilidadeTelefone, setContabilidadeTelefone] = useState('');
 
+    // Responsável pelo Aceite (Novo)
+    const [responsavelAceiteMesmoLegal, setResponsavelAceiteMesmoLegal] = useState(true);
+    const [responsavelAceiteNome, setResponsavelAceiteNome] = useState('');
+
     const [observacoes, setObservacoes] = useState('');
     const [aceitouTermos, setAceitouTermos] = useState(false);
+
+
+    // Persistência de Estado
+    const storageKey = `proposta_aceite_temp_${proposta.id}`;
+
+    // Carregar estado salvo
+    useEffect(() => {
+        const savedState = localStorage.getItem(storageKey);
+        if (savedState) {
+            try {
+                const parsedState = JSON.parse(savedState);
+
+                // Só restaura se a proposta não tiver mudado de status crítico externamente
+                if (!['comprovante_enviado', 'paga', 'aceita'].includes(proposta.status)) {
+                    if (parsedState.cnpj) {
+                        setCnpj(parsedState.cnpj);
+                        if (parsedState.cnpj.length === 18) {
+                            setCnpjValido(validarCNPJ(parsedState.cnpj));
+                        }
+                    }
+                    if (parsedState.razaoSocial) setRazaoSocial(parsedState.razaoSocial);
+                    if (parsedState.nomeFantasia) setNomeFantasia(parsedState.nomeFantasia);
+                    if (parsedState.inscricaoEstadual) setInscricaoEstadual(parsedState.inscricaoEstadual);
+                    if (parsedState.regimeTributario) setRegimeTributario(parsedState.regimeTributario);
+
+                    if (parsedState.endereco) setEndereco(parsedState.endereco);
+                    if (parsedState.numero) setNumero(parsedState.numero);
+                    if (parsedState.bairro) setBairro(parsedState.bairro);
+                    if (parsedState.complemento) setComplemento(parsedState.complemento);
+                    if (parsedState.cep) setCep(parsedState.cep);
+                    if (parsedState.cidade) setCidade(parsedState.cidade);
+                    if (parsedState.estado) setEstado(parsedState.estado);
+
+                    if (parsedState.responsavelNome) setResponsavelNome(parsedState.responsavelNome);
+                    if (parsedState.responsavelCargo) setResponsavelCargo(parsedState.responsavelCargo);
+                    if (parsedState.responsavelCpf) {
+                        setResponsavelCpf(parsedState.responsavelCpf);
+                        if (parsedState.responsavelCpf.length === 14) {
+                            setCpfValido(validarCPF(parsedState.responsavelCpf));
+                        }
+                    }
+
+                    if (parsedState.telefone) setTelefone(parsedState.telefone);
+                    if (parsedState.email) setEmail(parsedState.email);
+
+                    if (parsedState.contabilidadeNome) setContabilidadeNome(parsedState.contabilidadeNome);
+                    if (parsedState.contabilidadeContato) setContabilidadeContato(parsedState.contabilidadeContato);
+                    if (parsedState.contabilidadeTelefone) setContabilidadeTelefone(parsedState.contabilidadeTelefone);
+
+                    if (parsedState.responsavelAceiteMesmoLegal !== undefined) setResponsavelAceiteMesmoLegal(parsedState.responsavelAceiteMesmoLegal);
+                    if (parsedState.responsavelAceiteNome) setResponsavelAceiteNome(parsedState.responsavelAceiteNome);
+
+                    if (parsedState.etapa && parsedState.etapa !== 'sucesso') setEtapa(parsedState.etapa);
+                }
+            } catch (e) {
+                console.error("Erro ao restaurar estado", e);
+            }
+        }
+    }, [proposta.id]);
+
+    // Salvar estado a cada mudança relevante
+    useEffect(() => {
+        // Não salvar se já finalizou
+        if (etapa === 'sucesso' || ['comprovante_enviado', 'paga', 'aceita'].includes(proposta.status)) {
+            localStorage.removeItem(storageKey);
+            return;
+        }
+
+        const stateToSave = {
+            etapa,
+            cnpj, razaoSocial, nomeFantasia, inscricaoEstadual, regimeTributario,
+            endereco, numero, bairro, complemento, cep, cidade, estado,
+            responsavelNome, responsavelCargo, responsavelCpf,
+            telefone, email,
+            contabilidadeNome, contabilidadeContato, contabilidadeTelefone,
+            responsavelAceiteMesmoLegal, responsavelAceiteNome
+        };
+
+        const timeoutId = setTimeout(() => {
+            localStorage.setItem(storageKey, JSON.stringify(stateToSave));
+        }, 1000); // Debounce de 1s
+
+        return () => clearTimeout(timeoutId);
+    }, [
+        etapa, proposta.status,
+        cnpj, razaoSocial, nomeFantasia, inscricaoEstadual, regimeTributario,
+        endereco, numero, bairro, complemento, cep, cidade, estado,
+        responsavelNome, responsavelCargo, responsavelCpf,
+        telefone, email,
+        contabilidadeNome, contabilidadeContato, contabilidadeTelefone,
+        responsavelAceiteMesmoLegal, responsavelAceiteNome
+    ]);
 
     // Inicialização segura dos dados cadastrais (caso já existam na proposta)
     useEffect(() => {
@@ -122,6 +218,15 @@ export default function AceiteForm({ proposta, onClose, onSuccess }: AceiteFormP
                 setContabilidadeTelefone(d.contabilidade.telefone || '');
             }
 
+            // Responsável pelo Aceite - Recuperação (se existir)
+            // Como não temos esse campo no type DadosCadastrais ainda, vamos assumir que pode vir
+            // ou deixar padrão. Se já houve aceite, estaria no objeto Aceite.
+            if (proposta.aceite?.responsavelAceite) {
+                setResponsavelAceiteMesmoLegal(false);
+                setResponsavelAceiteNome(proposta.aceite.responsavelAceite);
+            }
+
+
             // Sincronização de Status em Tempo Real
             // Se a proposta foi concluída (por outra pessoa), vai para sucesso
             if (['comprovante_enviado', 'paga', 'aceita'].includes(proposta.status)) {
@@ -141,6 +246,22 @@ export default function AceiteForm({ proposta, onClose, onSuccess }: AceiteFormP
     // Comprovante
     const [comprovanteFile, setComprovanteFile] = useState<File | null>(null);
     const [comprovantePreview, setComprovantePreview] = useState<string | null>(null);
+    const [uploadProgress, setUploadProgress] = useState(0);
+
+    // Função para simular progresso
+    const simulateUpload = () => {
+        setUploadProgress(0);
+        const interval = setInterval(() => {
+            setUploadProgress(prev => {
+                if (prev >= 90) {
+                    clearInterval(interval);
+                    return 90;
+                }
+                return prev + 10;
+            });
+        }, 100);
+        return interval;
+    };
 
     // Permitir colar (CTRL+V) o comprovante
     useEffect(() => {
@@ -154,9 +275,20 @@ export default function AceiteForm({ proposta, onClose, onSuccess }: AceiteFormP
                 if (item.type.indexOf('image') === 0 || item.type === 'application/pdf') {
                     const file = item.getAsFile();
                     if (file) {
+                        setIsLoading(true);
+                        const interval = simulateUpload();
+
+                        // Pequeno delay para mostrar o progresso
+                        await new Promise(resolve => setTimeout(resolve, 800));
+
                         setComprovanteFile(file);
                         const preview = await readFileAsBase64(file);
                         setComprovantePreview(preview);
+
+                        clearInterval(interval);
+                        setUploadProgress(100);
+                        setTimeout(() => setIsLoading(false), 300);
+
                         // Feedback visual (opcional)
                         const dropzone = document.querySelector('.dropzone-area');
                         if (dropzone) {
@@ -175,6 +307,7 @@ export default function AceiteForm({ proposta, onClose, onSuccess }: AceiteFormP
 
     const [erros, setErros] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(false);
+    const [linkCopiado, setLinkCopiado] = useState(false);
 
     const handleAutofill = () => {
         setCnpj(MOCK_DATA.cnpj);
@@ -305,10 +438,21 @@ export default function AceiteForm({ proposta, onClose, onSuccess }: AceiteFormP
     // Dropzone para upload de comprovante
     const onDrop = useCallback(async (acceptedFiles: File[]) => {
         if (acceptedFiles.length > 0) {
+            setIsLoading(true);
+            const interval = simulateUpload();
+
             const file = acceptedFiles[0];
+
+            // Simular tempo de upload
+            await new Promise(resolve => setTimeout(resolve, 800));
+
             setComprovanteFile(file);
             const preview = await readFileAsBase64(file);
             setComprovantePreview(preview);
+
+            clearInterval(interval);
+            setUploadProgress(100);
+            setTimeout(() => setIsLoading(false), 300);
         }
     }, []);
 
@@ -353,9 +497,14 @@ export default function AceiteForm({ proposta, onClose, onSuccess }: AceiteFormP
             },
         };
 
+        // Define o nome do aceitante
+        const aceitante = responsavelAceiteMesmoLegal ? responsavelNome : responsavelAceiteNome;
+
         const propostaAtualizada: Proposta = {
             ...proposta,
             dadosCadastrais: dadosCadastrais,
+            // Se já tiver aceite, atualiza também
+            aceite: proposta.aceite ? { ...proposta.aceite, responsavelAceite: aceitante } : null,
             // Se ainda é rascunho/enviada, muda para aguardando pagamento
             status: (proposta.status === 'rascunho' || proposta.status === 'enviada') ? 'aguardando_pagamento' : proposta.status,
             updatedAt: new Date().toISOString(),
@@ -393,6 +542,11 @@ export default function AceiteForm({ proposta, onClose, onSuccess }: AceiteFormP
         };
 
         const errosValidacao = validarDadosCadastrais(dados);
+
+        // Validação adicional do responsável pelo aceite
+        if (!responsavelAceiteMesmoLegal && !responsavelAceiteNome.trim()) {
+            errosValidacao.responsavelAceite = 'Por favor, informe o nome do responsável pelo aceite';
+        }
 
         // Se houver erros, atualiza o estado e para
         if (Object.keys(errosValidacao).length > 0) {
@@ -561,6 +715,8 @@ export default function AceiteForm({ proposta, onClose, onSuccess }: AceiteFormP
                 },
             };
 
+            const aceitante = responsavelAceiteMesmoLegal ? responsavelNome : responsavelAceiteNome;
+
             const aceite: Aceite = {
                 aceitoEm: new Date().toISOString(),
                 formaPagamento: formaPagamento!,
@@ -576,6 +732,7 @@ export default function AceiteForm({ proposta, onClose, onSuccess }: AceiteFormP
                     aprovadoEm: null,
                     observacoes: observacoes,
                 },
+                responsavelAceite: aceitante,
             };
 
             const propostaAtualizada: Proposta = {
@@ -899,10 +1056,51 @@ export default function AceiteForm({ proposta, onClose, onSuccess }: AceiteFormP
                                 </div>
                             </div>
 
+                            {/* Responsável pelo Aceite */}
+                            <div className="border-t border-gray-200 pt-4 mt-4">
+                                <h3 className="text-md font-semibold text-gray-900 mb-3">Pessoa que está confirmando a proposta</h3>
+                                <div className="space-y-4">
+                                    <label className="flex items-center cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={responsavelAceiteMesmoLegal}
+                                            onChange={(e) => {
+                                                setResponsavelAceiteMesmoLegal(e.target.checked);
+                                                if (e.target.checked) setResponsavelAceiteNome('');
+                                            }}
+                                            className="w-4 h-4 text-extrema-purple border-gray-300 rounded focus:ring-extrema-purple"
+                                        />
+                                        <span className="ml-2 text-sm text-gray-700">
+                                            A confirmação está sendo feita pelo responsável legal da empresa.
+                                        </span>
+                                    </label>
+
+                                    {!responsavelAceiteMesmoLegal && (
+                                        <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Nome completo *</label>
+                                            <input
+                                                type="text"
+                                                value={responsavelAceiteNome}
+                                                onChange={(e) => setResponsavelAceiteNome(e.target.value)}
+                                                className={`input ${erros.responsavelAceite && !responsavelAceiteNome ? 'border-red-500' : ''}`}
+                                                placeholder="Nome de quem confirmou a proposta"
+                                            />
+                                            <p className="text-xs text-gray-500 mt-1">Informação registrada apenas para controle interno.</p>
+                                            {erros.responsavelAceite && !responsavelAceiteNome && <p className="text-xs text-red-600 mt-1">{erros.responsavelAceite}</p>}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
                             {/* Termos */}
                             <div className="pt-4 border-t border-gray-200">
                                 <label className="flex items-start cursor-pointer">
-                                    <input type="checkbox" checked={aceitouTermos} onChange={(e) => setAceitouTermos(e.target.checked)} className="mt-1 mr-3" />
+                                    <input
+                                        type="checkbox"
+                                        checked={aceitouTermos}
+                                        onChange={(e) => setAceitouTermos(e.target.checked)}
+                                        className="mt-1 mr-3 w-4 h-4 text-extrema-purple border-gray-300 rounded focus:ring-extrema-purple"
+                                    />
                                     <span className="text-sm text-gray-700">Declaro que li e aceito os termos da proposta comercial e confirmo que os dados cadastrais acima são verdadeiros.</span>
                                 </label>
                                 {erros.termos && <p className="text-xs text-red-600 mt-1">{erros.termos}</p>}
@@ -919,21 +1117,7 @@ export default function AceiteForm({ proposta, onClose, onSuccess }: AceiteFormP
                     {/* ==================== ETAPA 2: FORMA DE PAGAMENTO ==================== */}
                     {etapa === 'pagamento' && (
                         <div className="space-y-6">
-                            <div className="flex flex-col items-end mb-4">
-                                <span className="text-xs text-gray-500 mb-1">Não é você quem vai pagar?</span>
-                                <button
-                                    onClick={() => {
-                                        copyToClipboard(window.location.href);
-                                        alert('Link copiado! Envie para o responsável financeiro.');
-                                    }}
-                                    className="text-sm text-extrema-purple hover:underline flex items-center"
-                                >
-                                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                    </svg>
-                                    Copiar link para enviar ao financeiro
-                                </button>
-                            </div>
+
                             <p className="text-gray-600 text-center">
                                 Escolha a forma de pagamento que preferir:
                             </p>
@@ -995,13 +1179,82 @@ export default function AceiteForm({ proposta, onClose, onSuccess }: AceiteFormP
                                             <p className="text-sm text-blue-800">
                                                 {formaPagamento === 'avista'
                                                     ? 'Pagamento único via PIX com desconto especial.'
-                                                    : `Entrada via PIX (${formatCurrency(proposta.valores.parcelamento.valorParcela)}) + ${proposta.valores.parcelamento.qtdParcelas - 1} boletos.`
+                                                    : `Entrada via PIX (${formatCurrency(proposta.valores.parcelamento.valorParcela)}) + ${proposta.valores.parcelamento.qtdParcelas - 1} boleto(s).`
                                                 }
                                             </p>
                                         </div>
                                     </div>
                                 </div>
                             )}
+
+                            {/* Compartilhamento - Fase 2 Refinada */}
+                            <div className="mt-8 pt-6 border-t border-gray-100">
+                                <span className="block text-sm font-medium text-gray-700 mb-2">
+                                    Não é você quem vai pagar? Envie para o financeiro:
+                                </span>
+                                <div className="flex flex-wrap items-center gap-3">
+                                    <button
+                                        onClick={() => {
+                                            const text = `Olá! Segue a proposta *${proposta.numero}* da Extrema Sistema.\nValor à vista: *${formatCurrency(proposta.valores.valorAvista)}*\n\nLink para pagamento: ${window.location.href}`;
+                                            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                                        }}
+                                        className="bg-white text-green-600 border border-green-200 hover:bg-green-50 flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors"
+                                        title="Enviar por WhatsApp"
+                                    >
+                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                                        </svg>
+                                        WhatsApp
+                                    </button>
+
+                                    <button
+                                        onClick={() => {
+                                            const subject = `Link para pagamento da Proposta ${proposta.numero}`;
+                                            const body = `Olá,\n\nSegue a proposta ${proposta.numero} da Extrema Sistema.\nValor à vista: ${formatCurrency(proposta.valores.valorAvista)}\n\nLink para pagamento: ${window.location.href}\n\nAtenciosamente,`;
+                                            window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                                        }}
+                                        className="bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors"
+                                        title="Enviar por Email"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                        </svg>
+                                        Email
+                                    </button>
+
+                                    <button
+                                        onClick={() => {
+                                            copyToClipboard(window.location.href);
+                                            setLinkCopiado(true);
+                                            setTimeout(() => setLinkCopiado(false), 3000);
+                                        }}
+                                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm border transition-colors ${linkCopiado ? 'bg-green-50 text-green-700 border-green-200' : 'bg-white text-gray-600 border-gray-200 hover:bg-purple-50 hover:text-extrema-purple hover:border-purple-200'}`}
+                                        title="Copiar Link"
+                                    >
+                                        {linkCopiado ? (
+                                            <>
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                </svg>
+                                                Copiado!
+                                            </>
+                                        ) : (
+                                            <>
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                </svg>
+                                                Copiar Link
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                                <p className="text-xs text-gray-400 mt-2 flex items-center">
+                                    <svg className="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    </svg>
+                                    Seus dados já estão salvos. O responsável financeiro continuará exatamente deste ponto.
+                                </p>
+                            </div>
 
                             {/* Botões */}
                             <div className="flex justify-between pt-4">
@@ -1110,54 +1363,61 @@ export default function AceiteForm({ proposta, onClose, onSuccess }: AceiteFormP
                             {/* Dropzone */}
                             <div
                                 {...getRootProps()}
-                                className={`dropzone-area border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${isDragActive
-                                    ? 'border-extrema-purple bg-purple-50'
-                                    : comprovantePreview
-                                        ? 'border-green-500 bg-green-50'
-                                        : 'border-gray-300 hover:border-extrema-purple hover:bg-purple-50/50'
-                                    }`}
+                                className={`dropzone-area border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200
+                                    ${isDragActive ? 'border-extrema-purple bg-purple-50 scale-[1.02]' : 'border-gray-300 hover:border-extrema-purple hover:bg-gray-50'}`}
                             >
                                 <input {...getInputProps()} />
 
-                                {comprovantePreview ? (
-                                    <div>
-                                        {comprovanteFile?.type.startsWith('image/') ? (
-                                            <img
-                                                src={comprovantePreview}
-                                                alt="Preview do comprovante"
-                                                className="max-h-48 mx-auto rounded-lg shadow-md mb-3"
-                                            />
-                                        ) : (
-                                            <div className="w-20 h-20 mx-auto bg-red-100 rounded-lg flex items-center justify-center mb-3">
-                                                <span className="text-3xl">📄</span>
-                                            </div>
-                                        )}
-                                        <p className="text-sm text-green-600 font-medium">
-                                            ✓ {comprovanteFile?.name}
-                                        </p>
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            Clique ou arraste para trocar
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <div>
-                                        <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                            <svg className="w-8 h-8 text-extrema-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                {!comprovantePreview && !isLoading && (
+                                    <>
+                                        <div className="mx-auto w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mb-3">
+                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                             </svg>
                                         </div>
-                                        <p className="text-gray-700 font-medium">
-                                            {isDragActive ? 'Solte o arquivo aqui...' : 'Arraste o comprovante aqui'}
+                                        <p className="text-gray-900 font-medium mb-1">
+                                            Clique para enviar ou arraste o arquivo aqui
                                         </p>
-                                        <p className="text-gray-500 text-sm mt-1">
-                                            ou clique para selecionar
+                                        <p className="text-sm text-gray-500 mb-4">
+                                            (PDF, JPG ou PNG de até 5MB)
                                         </p>
-                                        <p className="text-gray-400 text-xs mt-3">
-                                            Formatos aceitos: JPG, PNG, PDF (máx. 5MB)
+                                        <div className="flex items-center justify-center gap-2 text-xs text-gray-400 bg-gray-50 py-1 px-3 rounded-full mx-auto w-fit">
+                                            <span className="font-bold">Dica:</span>
+                                            Você também pode pressionar <kbd className="font-mono bg-white border border-gray-200 rounded px-1">Ctrl+V</kbd> para colar
+                                        </div>
+                                    </>
+                                )}
+
+                                {isLoading && (
+                                    <div className="py-4">
+                                        <div className="relative w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-2">
+                                            <div
+                                                className="absolute top-0 left-0 h-full bg-extrema-purple transition-all duration-300 ease-out"
+                                                style={{ width: `${uploadProgress}%` }}
+                                            ></div>
+                                        </div>
+                                        <p className="text-sm text-gray-600 font-medium animate-pulse">
+                                            Processando arquivo... {uploadProgress}%
                                         </p>
-                                        <p className="text-extrema-purple text-xs mt-2 font-medium bg-purple-50 inline-block px-2 py-1 rounded">
-                                            Dica: Você pode colar (Ctrl+V) o print aqui!
-                                        </p>
+                                    </div>
+                                )}
+
+                                {comprovantePreview && !isLoading && (
+                                    <div className="relative group">
+                                        {comprovanteFile?.type.includes('image') ? (
+                                            <img src={comprovantePreview} alt="Comprovante" className="max-h-64 mx-auto rounded-lg shadow-sm" />
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center py-6 bg-gray-50 rounded-lg">
+                                                <svg className="w-12 h-12 text-red-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                                </svg>
+                                                <span className="font-medium text-gray-900">{comprovanteFile?.name}</span>
+                                                <span className="text-xs text-gray-500 mt-1">PDF Document</span>
+                                            </div>
+                                        )}
+                                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                                            <p className="text-white font-medium">Clique para alterar</p>
+                                        </div>
                                     </div>
                                 )}
                             </div>
