@@ -59,6 +59,13 @@ export default function EditarProposta({ params }: { params: Promise<{ id: strin
         if (id) {
             const proposta = getProposta(id);
             if (proposta) {
+                // Bloquear edição de propostas finalizadas
+                if (['paga', 'aceita', 'comprovante_enviado', 'recusada', 'expirada'].includes(proposta.status)) {
+                    alert('Propostas finalizadas ou recusadas não podem ser editadas.');
+                    router.push('/admin/propostas');
+                    return;
+                }
+
                 setPropostaOriginal(proposta);
 
                 // Populate fields

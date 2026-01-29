@@ -351,15 +351,27 @@ export default function ListaPropostas() {
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                                         </svg>
                                                     </button>
-                                                    <button
-                                                        onClick={() => router.push(`/admin/propostas/editar/${proposta.id}`)}
-                                                        className="text-gray-600 hover:text-gray-900"
-                                                        title="Editar"
-                                                    >
-                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                        </svg>
-                                                    </button>
+                                                    {['paga', 'aceita', 'comprovante_enviado', 'recusada', 'expirada'].includes(proposta.status) ? (
+                                                        <button
+                                                            disabled
+                                                            className="text-gray-300 cursor-not-allowed"
+                                                            title="Não é possível editar propostas finalizadas."
+                                                        >
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                            </svg>
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() => router.push(`/admin/propostas/editar/${proposta.id}`)}
+                                                            className="text-gray-600 hover:text-gray-900"
+                                                            title="Editar"
+                                                        >
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                            </svg>
+                                                        </button>
+                                                    )}
                                                     <button
                                                         onClick={() => {
                                                             const link = `${window.location.origin}/proposta/${proposta.hashPublico}`;

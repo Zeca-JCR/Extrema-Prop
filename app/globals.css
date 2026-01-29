@@ -230,47 +230,65 @@ body {
   background: linear-gradient(135deg, #6C63FF 0%, #8B4FD3 100%);
 }
 
-/* Animações */
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-in-out;
+/* Animações Refinadas */
+.animate-fade-in-up {
+  opacity: 0;
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.animate-slide-up {
-  animation: slideUp 0.3s ease-out;
-}
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
 
-.animate-scale {
-  animation: scale 0.2s ease-out;
-}
-
-@keyframes fadeIn {
+@keyframes fadeInUp {
   from {
     opacity: 0;
+    transform: translateY(20px);
   }
-
   to {
     opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    transform: translateY(10px);
-    opacity: 0;
-  }
-
-  to {
     transform: translateY(0);
-    opacity: 1;
   }
 }
 
-@keyframes scale {
-  from {
-    transform: scale(0.95);
-  }
+/* Sombras Suaves (Modernas) */
+.shadow-soft {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 0 3px rgba(0,0,0,0.02);
+}
 
-  to {
-    transform: scale(1);
-  }
+.shadow-soft-lg {
+  box-shadow: 0 10px 40px -5px rgba(0, 0, 0, 0.08), 0 0 5px rgba(0,0,0,0.03);
+}
+
+/* Card Moderno (Sem borda visível, foco na sombra) */
+.card-modern {
+  background-color: white;
+  border-radius: 1rem; /* 16px */
+  border: 1px solid rgba(0,0,0,0.04); /* Borda quase invisível */
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05); /* Sombra difusa */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Botões com Micro-interações */
+.btn-modern {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem; /* 12px */
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-modern:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px -3px rgba(139, 79, 211, 0.25);
+}
+
+.btn-modern:active:not(:disabled) {
+  transform: scale(0.98) translateY(0);
 }
