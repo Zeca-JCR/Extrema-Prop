@@ -12,7 +12,7 @@ export default function ProductShowcase({ proposta }: ProductShowcaseProps) {
     const col2 = modulos.slice(midPoint);
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8 animate-fade-in-up delay-200">
+        <div className="bg-white rounded-none shadow-swiss border-2 border-black overflow-hidden mb-8 animate-fade-in-up delay-200">
             <div className="p-8 border-b border-gray-100 bg-gray-50/50">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">{proposta.produto.nome}</h2>
                 <p className="text-gray-600 leading-relaxed text-lg">{proposta.produto.descricao}</p>
@@ -20,7 +20,7 @@ export default function ProductShowcase({ proposta }: ProductShowcaseProps) {
 
             <div className="p-8">
                 <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-                    <span className="w-1 h-3 bg-brand-purple rounded-full"></span>
+                    <span className="w-1 h-3 bg-brand-primary-500 rounded-none"></span>
                     O que está incluído
                 </h3>
 
@@ -59,7 +59,7 @@ function ModuleColumn({ items }: { items: string[] }) {
         <ul className="space-y-3">
             {items.map((item, idx) => (
                 <li key={idx} className="flex items-start gap-3 text-sm md:text-base text-gray-700">
-                    <div className="w-5 h-5 rounded-full bg-green-50 flex items-center justify-center shrink-0 mt-0.5">
+                    <div className="w-5 h-5 rounded-none bg-green-50 flex items-center justify-center shrink-0 mt-0.5">
                         <svg className="w-3 h-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                         </svg>
@@ -73,7 +73,7 @@ function ModuleColumn({ items }: { items: string[] }) {
 
 function Badge({ icon, label }: { icon: React.ReactNode, label: string }) {
     return (
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100 text-gray-700 text-sm font-medium">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-none border border-black text-gray-700 text-sm font-bold uppercase">
             <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 {icon}
             </svg>

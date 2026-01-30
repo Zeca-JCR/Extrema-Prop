@@ -12,7 +12,7 @@ export default function PricingSection({ proposta }: PricingSectionProps) {
     return (
         <div className="space-y-6 mb-12 animate-fade-in-up delay-300">
             {/* Main Card Container */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-none shadow-swiss border-2 border-black overflow-hidden">
                 <div className="p-8">
                     <h2 className="text-xl font-bold text-gray-900 mb-6">Valores e Condições Comerciais</h2>
 
@@ -22,7 +22,7 @@ export default function PricingSection({ proposta }: PricingSectionProps) {
                             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">INVESTIMENTO INICIAL (ADESÃO)</p>
                             <div className="text-3xl font-extrabold text-gray-900">{formatCurrency(valores.investimentoInicial)}</div>
                         </div>
-                        <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500">
+                        <div className="w-10 h-10 rounded-none bg-blue-50 flex items-center justify-center text-blue-500 border border-blue-200">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
@@ -43,8 +43,8 @@ export default function PricingSection({ proposta }: PricingSectionProps) {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
 
                         {/* Card À Vista (Destaque) */}
-                        <div className="border border-green-200 bg-green-50/30 rounded-xl p-6 relative">
-                            <div className="absolute top-4 right-4 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">
+                        <div className="border border-green-200 bg-green-50/30 rounded-none p-6 relative">
+                            <div className="absolute top-4 right-4 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-none uppercase tracking-wide border border-green-200">
                                 MELHOR OPÇÃO
                             </div>
 
@@ -57,7 +57,7 @@ export default function PricingSection({ proposta }: PricingSectionProps) {
                                 </div>
                                 <div className="flex justify-between text-sm">
                                     <span className="text-gray-900 font-medium">Desconto aplicado</span>
-                                    <span className="bg-green-100 text-green-700 text-xs font-bold px-1.5 py-0.5 rounded">-{valores.descontoAvistaPercentual}% OFF</span>
+                                    <span className="bg-green-100 text-green-700 text-xs font-bold px-1.5 py-0.5 rounded-none border border-green-200">-{valores.descontoAvistaPercentual}% OFF</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                     <span className="text-green-600 font-medium">Economia de</span>
@@ -80,14 +80,14 @@ export default function PricingSection({ proposta }: PricingSectionProps) {
                         </div>
 
                         {/* Card Parcelado */}
-                        <div className="border border-gray-100 bg-gray-50/50 rounded-xl p-6 flex flex-col justify-between">
+                        <div className="border border-gray-100 bg-gray-50/50 rounded-none p-6 flex flex-col justify-between">
                             <div>
                                 <h3 className="font-bold text-gray-900 text-lg mb-6">Pagamento Parcelado</h3>
 
                                 <div className="space-y-3 mb-6">
                                     <div className="flex justify-between text-sm items-center">
                                         <span className="text-gray-500">Parcelamento</span>
-                                        <span className="bg-white border border-gray-200 px-2 py-1 rounded text-gray-700 text-xs font-bold">
+                                        <span className="bg-white border border-gray-200 px-2 py-1 rounded-none text-gray-700 text-xs font-bold">
                                             {valores.parcelamento.qtdParcelas}x sem juros
                                         </span>
                                     </div>
@@ -120,7 +120,7 @@ export default function PricingSection({ proposta }: PricingSectionProps) {
                                     <span className="text-gray-500 font-medium text-sm">/mês</span>
                                 </div>
                             </div>
-                            <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-brand-purple">
+                            <div className="w-10 h-10 rounded-none bg-brand-primary-50 flex items-center justify-center text-brand-primary-500 border border-brand-primary-100">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>

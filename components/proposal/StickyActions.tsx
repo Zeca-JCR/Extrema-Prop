@@ -23,7 +23,7 @@ export default function StickyActions({ proposta, showSticky, onAccept, onDownlo
                 {canAccept && (
                     <button
                         onClick={onAccept}
-                        className="group relative flex items-center justify-center gap-3 bg-brand-purple text-white py-5 px-8 rounded-xl text-lg font-bold shadow-xl shadow-purple-500/20 hover:bg-brand-purple-dark hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+                        className="group relative flex items-center justify-center gap-3 bg-brand-primary-500 text-white py-5 px-8 rounded-none text-lg font-bold shadow-swiss hover:shadow-swiss-hover hover:bg-brand-primary-600 hover:-translate-y-1 transition-all duration-300 overflow-hidden border-2 border-black"
                     >
                         <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                         <span className="relative">{proposta.status === 'aguardando_pagamento' ? 'Realizar Pagamento' : 'Aceitar Proposta'}</span>
@@ -38,7 +38,7 @@ export default function StickyActions({ proposta, showSticky, onAccept, onDownlo
                     <button
                         onClick={() => onDownload(false)}
                         disabled={gerandoPDF}
-                        className="flex-1 flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-200 py-5 px-8 rounded-xl text-lg font-semibold hover:bg-gray-50 transition-all shadow-sm hover:shadow-md"
+                        className="flex-1 flex items-center justify-center gap-2 bg-white text-gray-700 border-2 border-black py-5 px-8 rounded-none text-lg font-semibold hover:bg-gray-50 transition-all shadow-swiss hover:shadow-swiss-hover"
                     >
                         {gerandoPDF ? (
                             <svg className="animate-spin h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -58,7 +58,7 @@ export default function StickyActions({ proposta, showSticky, onAccept, onDownlo
                         <button
                             onClick={() => onDownload(true)}
                             disabled={gerandoPDF}
-                            className="flex-1 flex items-center justify-center gap-2 bg-purple-50 text-purple-700 border border-purple-200 py-5 px-8 rounded-xl text-lg font-bold hover:bg-purple-100 transition-all shadow-sm hover:shadow-md"
+                            className="flex-1 flex items-center justify-center gap-2 bg-brand-primary-50 text-brand-primary-500 border-2 border-brand-primary-200 py-5 px-8 rounded-none text-lg font-bold hover:bg-brand-primary-100 transition-all shadow-swiss hover:shadow-swiss-hover"
                         >
                             {gerandoPDF ? (
                                 <svg className="animate-spin h-5 w-5 text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -78,13 +78,13 @@ export default function StickyActions({ proposta, showSticky, onAccept, onDownlo
 
             {/* Sticky Footer (Mobile/Desktop) */}
             {canAccept && showSticky && (
-                <div className="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-50 p-4 animate-slide-up">
+                <div className="fixed bottom-0 left-0 w-full bg-white border-t-2 border-black shadow-[0_-4px_0px_rgba(0,0,0,1)] z-50 p-4 animate-slide-up">
                     <div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
                         <div className="hidden md:block">
                             <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-0.5">Valor Final</p>
                             <div className="flex items-baseline gap-2">
                                 <span className="text-xl font-extrabold text-brand-purple">{formatCurrency(proposta.valores.valorAvista)}</span>
-                                <span className="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">À VISTA</span>
+                                <span className="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-none border border-green-200">À VISTA</span>
                             </div>
                         </div>
 
@@ -92,13 +92,13 @@ export default function StickyActions({ proposta, showSticky, onAccept, onDownlo
                             <button
                                 onClick={() => onDownload(false)}
                                 disabled={gerandoPDF}
-                                className="flex-1 md:flex-none py-3 px-4 rounded-lg bg-gray-100 text-gray-700 font-bold hover:bg-gray-200 transition-colors text-sm"
+                                className="flex-1 md:flex-none py-3 px-4 rounded-none bg-gray-100 text-gray-700 font-bold hover:bg-gray-200 transition-colors text-sm border-2 border-black"
                             >
                                 PDF
                             </button>
                             <button
                                 onClick={onAccept}
-                                className="flex-[2] md:w-64 py-3 px-6 rounded-lg bg-brand-purple text-white font-bold shadow-lg hover:bg-brand-purple-dark transition-colors text-sm md:text-base flex items-center justify-center gap-2"
+                                className="flex-[2] md:w-64 py-3 px-6 rounded-none bg-brand-primary-500 text-white font-bold shadow-swiss hover:shadow-swiss-hover hover:bg-brand-primary-600 transition-colors text-sm md:text-base flex items-center justify-center gap-2 border-2 border-black"
                             >
                                 {proposta.status === 'aguardando_pagamento' ? 'Pagar' : 'Aceitar Proposta'}
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

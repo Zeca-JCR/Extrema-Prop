@@ -65,7 +65,7 @@ export default function AdminLayout({
                                 className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
                                 title="Ir para o Dashboard"
                             >
-                                <div className=" relative w-10 h-10 rounded-lg overflow-hidden">
+                                <div className=" relative w-10 h-10 rounded-none overflow-hidden">
                                     <Image
                                         src="/logo-small.png"
                                         alt="Logo Extrema"
@@ -87,7 +87,7 @@ export default function AdminLayout({
                                     <Link
                                         key={link.href}
                                         href={link.href}
-                                        className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive(link.href)
+                                        className={`flex items-center space-x-2 px-3 py-2 rounded-none text-sm font-medium transition-colors ${isActive(link.href)
                                             ? 'bg-purple-100 text-purple-700'
                                             : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                                             }`}
@@ -138,7 +138,7 @@ export default function AdminLayout({
                     <div className="flex justify-around py-2 px-4">
                         <Link
                             href="/admin"
-                            className={`flex flex-col items-center px-3 py-1.5 rounded-lg text-xs transition-colors ${pathname === '/admin'
+                            className={`flex flex-col items-center px-3 py-1.5 rounded-none text-xs transition-colors ${pathname === '/admin'
                                 ? 'bg-purple-100 text-purple-700'
                                 : 'text-gray-500'
                                 }`}
@@ -152,7 +152,7 @@ export default function AdminLayout({
                             <Link
                                 key={link.href}
                                 href={link.href}
-                                className={`flex flex-col items-center px-3 py-1.5 rounded-lg text-xs transition-colors ${isActive(link.href)
+                                className={`flex flex-col items-center px-3 py-1.5 rounded-none text-xs transition-colors ${isActive(link.href)
                                     ? 'bg-purple-100 text-purple-700'
                                     : 'text-gray-500'
                                     }`}

@@ -61,7 +61,7 @@ export default function AdminDashboard() {
     return (
         <div className="space-y-6">
             {/* Welcome Banner */}
-            <div className="bg-gradient-to-r from-purple-800 to-purple-600 rounded-xl p-8 text-white shadow-lg">
+            <div className="bg-brand-primary-500 rounded-none p-8 text-white shadow-swiss border-2 border-black">
                 <h1 className="text-3xl font-bold mb-2">
                     Bem-vindo, {user?.nome}! 👋
                 </h1>
@@ -78,7 +78,7 @@ export default function AdminDashboard() {
                             <p className="text-sm font-medium text-gray-600">Propostas</p>
                             <p className="text-2xl font-bold text-gray-900 mt-1">{stats.total}</p>
                         </div>
-                        <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-none bg-blue-100 flex items-center justify-center border border-black">
                             <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
@@ -92,7 +92,7 @@ export default function AdminDashboard() {
                             <p className="text-sm font-medium text-gray-600">Enviadas</p>
                             <p className="text-2xl font-bold text-gray-900 mt-1">{stats.enviadas}</p>
                         </div>
-                        <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-none bg-green-100 flex items-center justify-center border border-black">
                             <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                             </svg>
@@ -106,7 +106,7 @@ export default function AdminDashboard() {
                             <p className="text-sm font-medium text-gray-600">Aceitas/Pagas</p>
                             <p className="text-2xl font-bold text-gray-900 mt-1">{stats.aceitas}</p>
                         </div>
-                        <div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-none bg-brand-primary-100 flex items-center justify-center border border-black">
                             <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
@@ -120,7 +120,7 @@ export default function AdminDashboard() {
                             <p className="text-sm font-medium text-gray-600">Templates</p>
                             <p className="text-2xl font-bold text-gray-900 mt-1">{stats.templates}</p>
                         </div>
-                        <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-none bg-orange-100 flex items-center justify-center border border-black">
                             <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
                             </svg>
@@ -190,7 +190,7 @@ export default function AdminDashboard() {
                                 <Link
                                     key={proposta.id}
                                     href="/admin/propostas"
-                                    className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100"
+                                    className="flex items-center justify-between p-3 rounded-none hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0"
                                 >
                                     <div className="min-w-0 flex-1">
                                         <p className="text-sm font-medium text-gray-900 truncate">
@@ -224,31 +224,31 @@ export default function AdminDashboard() {
                         </div>
                     ) : (
                         <div className="space-y-3">
-                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-none border border-black">
                                 <span className="text-sm text-gray-700">Rascunho</span>
                                 <span className="text-sm font-semibold text-gray-900">
                                     {getPropostas().filter(p => p.status === 'rascunho').length}
                                 </span>
                             </div>
-                            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-none border border-black">
                                 <span className="text-sm text-blue-700">Enviadas</span>
                                 <span className="text-sm font-semibold text-blue-900">
                                     {stats.enviadas}
                                 </span>
                             </div>
-                            <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+                            <div className="flex items-center justify-between p-3 bg-orange-50 rounded-none border border-black">
                                 <span className="text-sm text-orange-700">Aguardando Pagamento</span>
                                 <span className="text-sm font-semibold text-orange-900">
                                     {getPropostas().filter(p => p.status === 'aguardando_pagamento').length}
                                 </span>
                             </div>
-                            <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                            <div className="flex items-center justify-between p-3 bg-brand-primary-50 rounded-none border border-black">
                                 <span className="text-sm text-purple-700">Comprovante Enviado</span>
                                 <span className="text-sm font-semibold text-purple-900">
                                     {getPropostas().filter(p => p.status === 'comprovante_enviado').length}
                                 </span>
                             </div>
-                            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                            <div className="flex items-center justify-between p-3 bg-green-50 rounded-none border border-black">
                                 <span className="text-sm text-green-700">Pagas</span>
                                 <span className="text-sm font-semibold text-green-900">
                                     {getPropostas().filter(p => p.status === 'paga').length}

@@ -6,7 +6,7 @@ export default function ProposalFooter() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
                 <div>
                     <h4 className="font-bold text-gray-900 mb-4 flex items-center justify-center md:justify-start gap-2">
-                        <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                        <span className="w-2 h-2 rounded-none bg-green-500"></span>
                         Precisa de ajuda?
                     </h4>
                     <div className="space-y-3">

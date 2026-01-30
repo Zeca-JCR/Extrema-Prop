@@ -75,7 +75,7 @@ export default function LoginPage() {
 
                 {/* Formulário */}
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-                    <div className="rounded-lg shadow-sm space-y-4">
+                    <div className="rounded-none shadow-swiss border-2 border-black p-6 space-y-4 bg-white">
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                                 Email
@@ -112,7 +112,7 @@ export default function LoginPage() {
                     </div>
 
                     {erro && (
-                        <div className="rounded-lg bg-red-50 border border-red-200 p-3 animate-fade-in">
+                        <div className="rounded-none bg-red-50 border-2 border-red-200 p-3 animate-fade-in shadow-sm">
                             <p className="text-sm text-red-700 text-center">{erro}</p>
                         </div>
                     )}

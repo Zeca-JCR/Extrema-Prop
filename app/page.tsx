@@ -19,10 +19,10 @@ export default function HomePage() {
   }, [user, isLoading, router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-center">
-        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-extrema-purple"></div>
-        <p className="mt-4 text-gray-600">Carregando...</p>
+    <div className="min-h-screen flex items-center justify-center bg-brand-primary-50 text-brand-primary-500">
+      <div className="text-center relative">
+        <div className="inline-block w-8 h-8 bg-brand-accent-500 animate-pulse shadow-swiss"></div>
+        <p className="mt-6 font-bold uppercase tracking-widest text-sm">Carregando_</p>
       </div>
     </div>
   );

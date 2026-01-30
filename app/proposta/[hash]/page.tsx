@@ -8,7 +8,6 @@ import { gerarPDFProposta } from '@/lib/pdf';
 
 // Componentes
 import ProposalHeader from '@/components/proposal/ProposalHeader';
-import TrustBar from '@/components/proposal/TrustBar';
 import ProductShowcase from '@/components/proposal/ProductShowcase';
 import PricingSection from '@/components/proposal/PricingSection';
 import StickyActions from '@/components/proposal/StickyActions';
@@ -121,15 +120,15 @@ export default function PropostaPublica() {
 
                 {/* Status Alerts (Success/Warning) */}
                 {['comprovante_enviado', 'paga', 'aceita'].includes(proposta.status) && (
-                    <div className="mb-8 p-6 bg-green-50 border border-green-200 rounded-xl flex gap-4 items-start animate-fade-in-up">
-                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center shrink-0 text-green-600">
+                    <div className="mb-8 p-6 bg-green-50 border-2 border-green-800 rounded-none shadow-swiss flex gap-4 items-start animate-fade-in-up">
+                        <div className="w-8 h-8 bg-green-100 rounded-none border border-green-800 flex items-center justify-center shrink-0 text-green-800">
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                         </div>
                         <div>
-                            <h3 className="font-bold text-green-800 text-lg">
-                                {proposta.status === 'comprovante_enviado' ? 'Proposta em Análise' : 'Proposta Aprovada!'}
+                            <h3 className="font-bold text-green-900 text-lg uppercase tracking-tight">
+                                {proposta.status === 'comprovante_enviado' ? 'Proposta em Análise' : 'Proposta Aprovada'}
                             </h3>
-                            <p className="text-green-700 mt-1">
+                            <p className="text-green-800 mt-1 font-medium">
                                 {proposta.status === 'comprovante_enviado'
                                     ? 'Recebemos seu comprovante. Nossa equipe validará em breve.'
                                     : 'Tudo pronto! Seu processo de adesão foi concluído com sucesso.'}
