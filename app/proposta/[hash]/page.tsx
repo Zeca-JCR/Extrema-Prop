@@ -595,8 +595,9 @@ export default function PropostaPublica() {
                     showAceiteModal && proposta && (
                         <AceiteForm
                             proposta={proposta}
+                            isOpen={showAceiteModal}
                             onClose={() => setShowAceiteModal(false)}
-                            onSuccess={handleAceiteSuccess}
+                            onPropostaChange={handleAceiteSuccess}
                         />
                     )
                 }

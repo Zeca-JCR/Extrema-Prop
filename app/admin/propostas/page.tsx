@@ -27,6 +27,8 @@ export default function ListaPropostas() {
 
         // Polling para detectar mudanças de status
         const interval = setInterval(() => {
+            if (document.hidden) return; // Pausa polling se aba não visível
+
             const novasPropostas = getPropostas();
             let mudancas: string[] = [];
 
@@ -49,7 +51,7 @@ export default function ListaPropostas() {
                 // Auto-fechar após 5 segundos
                 setTimeout(() => setNotificacao(null), 5000);
             }
-        }, 3000);
+        }, 15000); // 15 segundos para economizar bateria em mobile
 
         return () => clearInterval(interval);
     }, [user]);
@@ -272,7 +274,7 @@ export default function ListaPropostas() {
                 </div>
             </div>
 
-            {/* Tabela */}
+            {/* Tabela (Desktop) e Cards (Mobile) */}
             {propostasFiltradas.length === 0 ? (
                 <div className="card p-12 text-center">
                     <svg className="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -287,138 +289,249 @@ export default function ListaPropostas() {
                     </button>
                 </div>
             ) : (
-                <div className="card overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <SortableHeader label="Número" sortKey="numero" />
-                                    <SortableHeader label="Cliente" sortKey="cliente" />
-                                    <SortableHeader label="Produto" sortKey="produto" />
-                                    <SortableHeader label="Valor" sortKey="valor" />
-                                    <SortableHeader label="Status" sortKey="status" />
-                                    <SortableHeader label="Validade" sortKey="validade" />
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Ações
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {propostasFiltradas.map((proposta) => {
-                                    const diasRest = diasRestantes(proposta.dataValidade);
+                <>
+                    {/* Visualização Mobile (Cards) */}
+                    <div className="block md:hidden space-y-4">
+                        {propostasFiltradas.map((proposta) => {
+                            const diasRest = diasRestantes(proposta.dataValidade);
+                            const isFinalizada = ['paga', 'aceita', 'comprovante_enviado', 'recusada', 'expirada'].includes(proposta.status);
 
-                                    return (
-                                        <tr key={proposta.id} className="hover:bg-gray-50">
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm font-medium text-gray-900">{proposta.numero || 'N/A'}</div>
-                                                <div className="text-xs text-gray-500">{proposta.createdAt ? formatDate(proposta.createdAt) : 'N/A'}</div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="text-sm font-medium text-gray-900">{proposta.cliente?.empresa || 'N/A'}</div>
-                                                <div className="text-xs text-gray-500">{proposta.cliente?.contato || 'N/A'}</div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="text-sm text-gray-900">{proposta.produto?.nome || 'N/A'}</div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm font-medium text-gray-900">
-                                                    {proposta.valores?.investimentoInicial ? formatCurrency(proposta.valores.investimentoInicial) : 'N/A'}
-                                                </div>
-                                                <div className="text-xs text-gray-500">
-                                                    ou {proposta.valores?.valorAvista ? formatCurrency(proposta.valores.valorAvista) : 'N/A'}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={`badge ${getStatusBadgeClass(proposta.status)}`}>
-                                                    {getStatusLabel(proposta.status)}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm text-gray-900">{proposta.dataValidade ? formatDate(proposta.dataValidade) : 'N/A'}</div>
-                                                <div className={`text-xs ${diasRest < 0 ? 'text-red-600' : diasRest <= 3 ? 'text-orange-600' : 'text-gray-500'}`}>
-                                                    {diasRest < 0 ? 'Expirada' : `${diasRest} dia(s)`}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                <div className="flex items-center space-x-2">
-                                                    <button
-                                                        onClick={() => setPropostaSelecionada(proposta)}
-                                                        className="text-extrema-purple hover:text-extrema-purple-600"
-                                                        title="Ver detalhes e comprovante"
-                                                    >
-                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                        </svg>
-                                                    </button>
-                                                    {['paga', 'aceita', 'comprovante_enviado', 'recusada', 'expirada'].includes(proposta.status) ? (
-                                                        <button
-                                                            disabled
-                                                            className="text-gray-300 cursor-not-allowed"
-                                                            title="Não é possível editar propostas finalizadas."
-                                                        >
-                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                            </svg>
-                                                        </button>
-                                                    ) : (
-                                                        <button
-                                                            onClick={() => router.push(`/admin/propostas/editar/${proposta.id}`)}
-                                                            className="text-gray-600 hover:text-gray-900"
-                                                            title="Editar"
-                                                        >
-                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                            </svg>
-                                                        </button>
-                                                    )}
-                                                    <button
-                                                        onClick={() => {
-                                                            const link = `${window.location.origin}/proposta/${proposta.hashPublico}`;
-                                                            window.open(link, '_blank');
-                                                        }}
-                                                        className="text-blue-600 hover:text-blue-700"
-                                                        title="Abrir link público"
-                                                    >
-                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                                        </svg>
-                                                    </button>
-                                                    <button
-                                                        onClick={async () => {
-                                                            const link = `${window.location.origin}/proposta/${proposta.hashPublico}`;
-                                                            try {
-                                                                await navigator.clipboard.writeText(link);
-                                                                alert(`Link copiado!\n\n${link}\n\nAgora você pode enviar por WhatsApp, Email ou qualquer outro meio.`);
-                                                            } catch (err) {
-                                                                prompt('Link da proposta (Ctrl+C para copiar):', link);
-                                                            }
-                                                        }}
-                                                        className="text-green-600 hover:text-green-700"
-                                                        title="Copiar link para enviar"
-                                                    >
-                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                                                        </svg>
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleExcluir(proposta.id)}
-                                                        className="text-red-600 hover:text-red-900"
-                                                        title="Excluir"
-                                                    >
-                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
+                            return (
+                                <div key={proposta.id} className="bg-white rounded-lg shadow p-4 border border-gray-100">
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div>
+                                            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">{proposta.numero}</span>
+                                            <h3 className="font-bold text-gray-900 text-lg">{proposta.cliente?.empresa || 'Cliente N/A'}</h3>
+                                            <p className="text-sm text-gray-500">{proposta.produto?.nome}</p>
+                                        </div>
+                                        <span className={`badge ${getStatusBadgeClass(proposta.status)}`}>
+                                            {getStatusLabel(proposta.status)}
+                                        </span>
+                                    </div>
+
+                                    <div className="space-y-2 mb-4">
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-gray-500">Valor:</span>
+                                            <span className="font-semibold text-gray-900">
+                                                {proposta.valores?.valorAvista ? formatCurrency(proposta.valores.valorAvista) : 'N/A'}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-gray-500">Validade:</span>
+                                            <span className={`${diasRest < 0 ? 'text-red-600' : diasRest <= 3 ? 'text-orange-600' : 'text-gray-900'}`}>
+                                                {diasRest < 0 ? 'Expirada' : `${formatDate(proposta.dataValidade)} (${diasRest}d)`}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-end gap-2 border-t pt-3">
+                                        <button
+                                            onClick={() => setPropostaSelecionada(proposta)}
+                                            className="p-2 text-extrema-purple active:bg-purple-50 rounded-full"
+                                            title="Ver detalhes"
+                                        >
+                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </button>
+
+                                        {!isFinalizada && (
+                                            <button
+                                                onClick={() => router.push(`/admin/propostas/editar/${proposta.id}`)}
+                                                className="p-2 text-gray-600 active:bg-gray-100 rounded-full"
+                                                title="Editar"
+                                            >
+                                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                            </button>
+                                        )}
+
+                                        <button
+                                            onClick={() => {
+                                                const link = `${window.location.origin}/proposta/${proposta.hashPublico}`;
+                                                window.open(link, '_blank');
+                                            }}
+                                            className="p-2 text-blue-600 active:bg-blue-50 rounded-full"
+                                            title="Abrir link público"
+                                        >
+                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                            </svg>
+                                        </button>
+
+                                        <button
+                                            onClick={async () => {
+                                                const link = `${window.location.origin}/proposta/${proposta.hashPublico}`;
+                                                try {
+                                                    await navigator.clipboard.writeText(link);
+                                                    setNotificacao({ mensagem: 'Link copiado!', tipo: 'success' });
+                                                    setTimeout(() => setNotificacao(null), 3000);
+                                                } catch (err) {
+                                                    setNotificacao({ mensagem: 'Erro ao copiar', tipo: 'info' });
+                                                    setTimeout(() => setNotificacao(null), 3000);
+                                                }
+                                            }}
+                                            className="p-2 text-green-600 active:bg-green-50 rounded-full"
+                                            title="Copiar Link"
+                                        >
+                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                            </svg>
+                                        </button>
+
+                                        <button
+                                            onClick={() => handleExcluir(proposta.id)}
+                                            className="p-2 text-red-600 active:bg-red-50 rounded-full"
+                                            title="Excluir"
+                                        >
+                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
-                </div>
+
+                    {/* Visualização Desktop (Tabela) */}
+                    <div className="hidden md:block card overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <SortableHeader label="Número" sortKey="numero" />
+                                        <SortableHeader label="Cliente" sortKey="cliente" />
+                                        <SortableHeader label="Produto" sortKey="produto" />
+                                        <SortableHeader label="Valor" sortKey="valor" />
+                                        <SortableHeader label="Status" sortKey="status" />
+                                        <SortableHeader label="Validade" sortKey="validade" />
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Ações
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {propostasFiltradas.map((proposta) => {
+                                        const diasRest = diasRestantes(proposta.dataValidade);
+
+                                        return (
+                                            <tr key={proposta.id} className="hover:bg-gray-50">
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm font-medium text-gray-900">{proposta.numero || 'N/A'}</div>
+                                                    <div className="text-xs text-gray-500">{proposta.createdAt ? formatDate(proposta.createdAt) : 'N/A'}</div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="text-sm font-medium text-gray-900">{proposta.cliente?.empresa || 'N/A'}</div>
+                                                    <div className="text-xs text-gray-500">{proposta.cliente?.contato || 'N/A'}</div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="text-sm text-gray-900">{proposta.produto?.nome || 'N/A'}</div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm font-medium text-gray-900">
+                                                        {proposta.valores?.investimentoInicial ? formatCurrency(proposta.valores.investimentoInicial) : 'N/A'}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500">
+                                                        ou {proposta.valores?.valorAvista ? formatCurrency(proposta.valores.valorAvista) : 'N/A'}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className={`badge ${getStatusBadgeClass(proposta.status)}`}>
+                                                        {getStatusLabel(proposta.status)}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm text-gray-900">{proposta.dataValidade ? formatDate(proposta.dataValidade) : 'N/A'}</div>
+                                                    <div className={`text-xs ${diasRest < 0 ? 'text-red-600' : diasRest <= 3 ? 'text-orange-600' : 'text-gray-500'}`}>
+                                                        {diasRest < 0 ? 'Expirada' : `${diasRest} dia(s)`}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                                    <div className="flex items-center space-x-2">
+                                                        <button
+                                                            onClick={() => setPropostaSelecionada(proposta)}
+                                                            className="text-extrema-purple hover:text-extrema-purple-600"
+                                                            title="Ver detalhes e comprovante"
+                                                        >
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                            </svg>
+                                                        </button>
+                                                        {['paga', 'aceita', 'comprovante_enviado', 'recusada', 'expirada'].includes(proposta.status) ? (
+                                                            <button
+                                                                disabled
+                                                                className="text-gray-300 cursor-not-allowed"
+                                                                title="Não é possível editar propostas finalizadas."
+                                                            >
+                                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                                </svg>
+                                                            </button>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() => router.push(`/admin/propostas/editar/${proposta.id}`)}
+                                                                className="text-gray-600 hover:text-gray-900"
+                                                                title="Editar"
+                                                            >
+                                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                                </svg>
+                                                            </button>
+                                                        )}
+                                                        <button
+                                                            onClick={() => {
+                                                                const link = `${window.location.origin}/proposta/${proposta.hashPublico}`;
+                                                                window.open(link, '_blank');
+                                                            }}
+                                                            className="text-blue-600 hover:text-blue-700"
+                                                            title="Abrir link público"
+                                                        >
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                            </svg>
+                                                        </button>
+                                                        <button
+                                                            onClick={async () => {
+                                                                const link = `${window.location.origin}/proposta/${proposta.hashPublico}`;
+                                                                try {
+                                                                    await navigator.clipboard.writeText(link);
+                                                                    setNotificacao({ mensagem: 'Link copiado!', tipo: 'success' });
+                                                                    setTimeout(() => setNotificacao(null), 3000);
+                                                                } catch (err) {
+                                                                    setNotificacao({ mensagem: 'Falha ao copiar', tipo: 'info' });
+                                                                    setTimeout(() => setNotificacao(null), 3000);
+                                                                }
+                                                            }}
+                                                            className="text-green-600 hover:text-green-700"
+                                                            title="Copiar link para enviar"
+                                                        >
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                                            </svg>
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleExcluir(proposta.id)}
+                                                            className="text-red-600 hover:text-red-900"
+                                                            title="Excluir"
+                                                        >
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </>
             )}
             {propostaSelecionada && (
                 <DetalhesPropostaModal
