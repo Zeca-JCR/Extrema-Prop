@@ -119,7 +119,7 @@ export default function ProposalHeader({ proposta, config, expirada }: ProposalH
                                     </svg>
                                 }
                                 title="Suporte Especializado"
-                                subtitle="Contábil e Tributário"
+                                subtitle="Administrativo, Contábil e Tributário"
                             />
                             <TrustItem
                                 icon={

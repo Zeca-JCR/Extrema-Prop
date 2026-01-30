@@ -497,66 +497,73 @@ export async function gerarPDFProposta(proposta: Proposta, options?: { comAceite
 
 
         // ==================== DADOS DO ACEITE & COMPROVANTE ====================
+        // ==================== DADOS DO ACEITE & COMPROVANTE ====================
         if (options?.comAceite && proposta.aceite) {
-            doc.addPage();
-            yPos = 20;
+            try {
+                doc.addPage();
+                yPos = 20;
 
-            // Título Aceite
-            doc.setFillColor(...COLORS.purple);
-            doc.rect(0, 0, pageWidth, 30, 'F');
-            doc.setTextColor(...COLORS.white);
-            doc.setFontSize(18);
-            doc.setFont('helvetica', 'bold');
-            doc.text('REGISTRO DE ACEITE', margin, 20);
-
-            yPos = 50;
-
-            doc.setTextColor(...COLORS.black);
-            doc.setFontSize(12);
-            doc.text('Dados do Pagamento', margin, yPos);
-            yPos += 10;
-
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-
-            // Forma pagamento
-            const forma = proposta.aceite.formaPagamento === 'avista' ? 'PIX à Vista' : 'Entrada + Parcelamento';
-            doc.text(`Forma de Pagamento: ${forma}`, margin, yPos);
-            yPos += 7;
-
-            doc.text(`Valor Pago: ${formatCurrency(proposta.aceite.valorPagoPix)}`, margin, yPos);
-            yPos += 7;
-
-            doc.text(`Data do Aceite: ${formatDate(proposta.aceite.aceitoEm)}`, margin, yPos);
-            yPos += 15;
-
-            // Comprovante
-            if (proposta.aceite.comprovante?.arquivoBase64) {
-                doc.setFontSize(12);
+                // Título Aceite
+                doc.setFillColor(...COLORS.purple);
+                doc.rect(0, 0, pageWidth, 30, 'F');
+                doc.setTextColor(...COLORS.white);
+                doc.setFontSize(18);
                 doc.setFont('helvetica', 'bold');
-                doc.text('Comprovante em Anexo', margin, yPos);
+                doc.text('REGISTRO DE ACEITE', margin, 20);
+
+                yPos = 50;
+
+                doc.setTextColor(...COLORS.black);
+                doc.setFontSize(12);
+                doc.text('Dados do Pagamento', margin, yPos);
                 yPos += 10;
 
-                const imgData = proposta.aceite.comprovante.arquivoBase64;
-                if (imgData.startsWith('data:image')) {
-                    try {
-                        // Ajustar imagem para caber na página
-                        const maxWidth = pageWidth - 2 * margin;
-                        const maxHeight = pageHeight - yPos - margin;
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
 
-                        // Adiciona imagem (assumindo que cabe, o ideal seria calcular ratio)
-                        // Para simplicidade, vamos fixar largura e deixar altura automática (se jsPDF suportar) ou quadrada
-                        doc.addImage(imgData, 'JPEG', margin, yPos, maxWidth, 0);
-                    } catch (e) {
+                // Forma pagamento
+                const forma = proposta.aceite.formaPagamento === 'avista' ? 'PIX à Vista' : 'Entrada + Parcelamento';
+                doc.text(`Forma de Pagamento: ${forma}`, margin, yPos);
+                yPos += 7;
+
+                doc.text(`Valor Pago: ${formatCurrency(proposta.aceite.valorPagoPix)}`, margin, yPos);
+                yPos += 7;
+
+                doc.text(`Data do Aceite: ${formatDate(proposta.aceite.aceitoEm)}`, margin, yPos);
+                yPos += 15;
+
+                // Comprovante
+                if (proposta.aceite.comprovante?.arquivoBase64) {
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('Comprovante em Anexo', margin, yPos);
+                    yPos += 10;
+
+                    const imgData = proposta.aceite.comprovante.arquivoBase64;
+                    if (imgData.startsWith('data:image')) {
+                        try {
+                            // Ajustar imagem para caber na página
+                            const maxWidth = pageWidth - 2 * margin;
+                            const maxHeight = pageHeight - yPos - margin;
+
+                            // Adiciona imagem (assumindo que cabe, o ideal seria calcular ratio)
+                            // Para simplicidade, vamos fixar largura e deixar altura automática (se jsPDF suportar) ou quadrada
+                            doc.addImage(imgData, 'JPEG', margin, yPos, maxWidth, 0);
+                        } catch (e) {
+                            console.error('Erro ao renderizar imagem do comprovante:', e);
+                            doc.setFontSize(10);
+                            doc.setTextColor(...COLORS.red);
+                            doc.text('Não foi possível renderizar a imagem do comprovante.', margin, yPos + 10);
+                        }
+                    } else {
                         doc.setFontSize(10);
-                        doc.setTextColor(...COLORS.red);
-                        doc.text('Não foi possível renderizar a imagem do comprovante.', margin, yPos + 10);
+                        doc.setTextColor(...COLORS.gray);
+                        doc.text('O comprovante está em formato PDF e não pode ser exibido aqui.', margin, yPos + 10);
                     }
-                } else {
-                    doc.setFontSize(10);
-                    doc.setTextColor(...COLORS.gray);
-                    doc.text('O comprovante está em formato PDF e não pode ser exibido aqui.', margin, yPos + 10);
                 }
+            } catch (error) {
+                console.error('Erro ao gerar seção de aceite:', error);
+                // Não impedir o download se apenas esta seção falhar
             }
         }
 
@@ -602,10 +609,11 @@ export async function gerarPDFProposta(proposta: Proposta, options?: { comAceite
         console.log('✅ Salvando PDF:', fileName);
         doc.save(fileName);
         console.log('🏁 PDF gerado e salvo com sucesso');
+        // alert(`PDF Salvo: ${fileName}`);
 
     } catch (error) {
         console.error('❌ Erro fatal ao gerar PDF:', error);
-        alert('Erro ao gerar PDF. Consulte o console para mais detalhes.');
+        alert(`Erro fatal ao gerar PDF: ${error instanceof Error ? error.message : JSON.stringify(error)}`);
         throw error;
     }
 }

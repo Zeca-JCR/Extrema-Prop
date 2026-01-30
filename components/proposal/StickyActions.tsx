@@ -14,7 +14,7 @@ interface StickyActionsProps {
 export default function StickyActions({ proposta, showSticky, onAccept, onDownload, gerandoPDF, canAccept }: StickyActionsProps) {
     const [showDownloadMenu, setShowDownloadMenu] = useState(false);
 
-    if (!canAccept && showSticky) return null;
+    // if (!canAccept && showSticky) return null; // Removed to prevent unmounting inline actions
 
     return (
         <>
@@ -33,58 +33,45 @@ export default function StickyActions({ proposta, showSticky, onAccept, onDownlo
                     </button>
                 )}
 
-                <div className="relative">
+                <div className={`flex flex-col md:flex-row gap-4 ${!canAccept ? 'col-span-2' : ''}`}>
+                    {/* Botão Versão Original */}
                     <button
-                        onClick={() => setShowDownloadMenu(!showDownloadMenu)}
+                        onClick={() => onDownload(false)}
                         disabled={gerandoPDF}
-                        className={`w-full flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-200 py-5 px-8 rounded-xl text-lg font-semibold hover:bg-gray-50 transition-all ${!canAccept ? 'col-span-2' : ''}`}
+                        className="flex-1 flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-200 py-5 px-8 rounded-xl text-lg font-semibold hover:bg-gray-50 transition-all shadow-sm hover:shadow-md"
                     >
                         {gerandoPDF ? (
-                            <>
-                                <svg className="animate-spin h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <svg className="animate-spin h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        ) : (
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        )}
+                        <span>Baixar Proposta</span>
+                    </button>
+
+                    {/* Botão Versão com Aceite (se existir) */}
+                    {proposta.aceite && (
+                        <button
+                            onClick={() => onDownload(true)}
+                            disabled={gerandoPDF}
+                            className="flex-1 flex items-center justify-center gap-2 bg-purple-50 text-purple-700 border border-purple-200 py-5 px-8 rounded-xl text-lg font-bold hover:bg-purple-100 transition-all shadow-sm hover:shadow-md"
+                        >
+                            {gerandoPDF ? (
+                                <svg className="animate-spin h-5 w-5 text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
-                                <span>Gerando PDF...</span>
-                            </>
-                        ) : (
-                            <>
+                            ) : (
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <span>Baixar PDF</span>
-                                <svg className={`w-4 h-4 ml-1 transition-transform ${showDownloadMenu ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </>
-                        )}
-                    </button>
-
-                    {/* Dropdown Menu Inline */}
-                    {showDownloadMenu && (
-                        <div className="absolute top-full left-0 w-full mt-2 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-20 animate-fade-in-up">
-                            <button
-                                onClick={() => { onDownload(false); setShowDownloadMenu(false); }}
-                                className="w-full text-left px-6 py-4 hover:bg-gray-50 text-gray-700 font-medium border-b border-gray-50 flex justify-between group"
-                            >
-                                Versão Original
-                                <span className="opacity-0 group-hover:opacity-100 text-brand-purple">↓</span>
-                            </button>
-                            {proposta.aceite && (
-                                <button
-                                    onClick={() => { onDownload(true); setShowDownloadMenu(false); }}
-                                    className="w-full text-left px-6 py-4 hover:bg-gray-50 text-gray-700 font-medium flex justify-between group"
-                                >
-                                    Versão com Aceite
-                                    <span className="opacity-0 group-hover:opacity-100 text-brand-purple">↓</span>
-                                </button>
                             )}
-                        </div>
-                    )}
-
-                    {/* Backdrop para fechar */}
-                    {showDownloadMenu && (
-                        <div className="fixed inset-0 z-10" onClick={() => setShowDownloadMenu(false)}></div>
+                            <span>Comprovante de Aceite</span>
+                        </button>
                     )}
                 </div>
             </div>

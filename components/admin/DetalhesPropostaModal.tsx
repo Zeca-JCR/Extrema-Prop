@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Proposta, Aceite, updateProposta } from '@/lib/storage';
 import { formatCurrency, formatDate, getStatusLabel } from '@/lib/utils';
 import { QrCodePix } from 'qrcode-pix';
+import { gerarPDFProposta } from '@/lib/pdf';
 
 interface DetalhesPropostaModalProps {
     proposta: Proposta | null;
@@ -16,6 +17,21 @@ export default function DetalhesPropostaModal({ proposta, onClose, onUpdate }: D
 
     const [activeTab, setActiveTab] = useState<'geral' | 'aceite'>('geral');
     const [isLoading, setIsLoading] = useState(false);
+    const [downloading, setDownloading] = useState(false);
+    const [showDownloadMenu, setShowDownloadMenu] = useState(false);
+
+    const handleDownloadPDF = async (comAceite: boolean) => {
+        setDownloading(true);
+        setShowDownloadMenu(false); // Fechar menu ao iniciar
+        try {
+            await gerarPDFProposta(proposta, { comAceite });
+        } catch (error) {
+            console.error(error);
+            alert('Erro ao gerar PDF');
+        } finally {
+            setDownloading(false);
+        }
+    };
 
     const isAceiteEnv = proposta.status === 'comprovante_enviado' || proposta.status === 'paga' || proposta.status === 'aceita';
     const aceite = proposta.aceite;
@@ -59,11 +75,49 @@ export default function DetalhesPropostaModal({ proposta, onClose, onUpdate }: D
                         <h2 className="text-xl font-bold text-gray-900">Detalhes da Proposta</h2>
                         <p className="text-sm text-gray-500">#{proposta.numero} - {proposta.cliente.empresa}</p>
                     </div>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowDownloadMenu(!showDownloadMenu)}
+                                disabled={downloading}
+                                className="flex items-center gap-1 text-sm font-medium text-extrema-purple hover:text-purple-700 px-3 py-2 rounded-lg hover:bg-purple-50 transition-colors disabled:opacity-50"
+                            >
+                                {downloading ? 'Gerando...' : 'Baixar PDF'}
+                                <svg className={`w-4 h-4 transition-transform ${showDownloadMenu ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            {/* Backdrop para fechar */}
+                            {showDownloadMenu && (
+                                <div className="fixed inset-0 z-10 cursor-default" onClick={() => setShowDownloadMenu(false)}></div>
+                            )}
+
+                            {showDownloadMenu && (
+                                <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-xl border border-gray-100 z-20 animate-fade-in-up">
+                                    <button
+                                        onClick={() => handleDownloadPDF(false)}
+                                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 first:rounded-t-lg"
+                                    >
+                                        Versão Original
+                                    </button>
+                                    {((proposta.aceite || proposta.dadosCadastrais) && (proposta.status === 'comprovante_enviado' || proposta.status === 'paga' || proposta.status === 'aceita')) && (
+                                        <button
+                                            onClick={() => handleDownloadPDF(true)}
+                                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 last:rounded-b-lg border-t border-gray-100"
+                                        >
+                                            Versão com Aceite
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-2">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 {/* Tabs */}
@@ -177,6 +231,9 @@ export default function DetalhesPropostaModal({ proposta, onClose, onUpdate }: D
                                             <div className="text-right">
                                                 <p className="text-sm text-blue-800">Aceito em:</p>
                                                 <p className="font-medium text-blue-900">{formatDate(aceite.aceitoEm)}</p>
+                                                {aceite.responsavelAceite && (
+                                                    <p className="text-xs text-blue-700 mt-1">por {aceite.responsavelAceite}</p>
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -230,13 +287,28 @@ export default function DetalhesPropostaModal({ proposta, onClose, onUpdate }: D
                                                             <div>
                                                                 <span className="block text-gray-500">Responsável</span>
                                                                 <span className="font-medium">{dados.responsavel.nome} ({dados.responsavel.cargo})</span>
-                                                                <span className="block text-xs text-gray-500">CPF: {dados.responsavel.cpf}</span>
+                                                                <span className="block text-xs text-gray-500">CPF: {dados.responsavel.cpf} {dados.responsavel.rg ? `| RG: ${dados.responsavel.rg}` : ''}</span>
                                                             </div>
                                                             <div>
                                                                 <span className="block text-gray-500">Contato</span>
                                                                 <span className="font-medium">{dados.email}</span>
                                                                 <span className="block text-xs text-gray-500">{dados.telefone}</span>
                                                             </div>
+                                                            <div>
+                                                                <span className="block text-gray-500">Inscrição Estadual</span>
+                                                                <span className="font-medium">{dados.inscricaoEstadual || 'Isento/Não Informado'}</span>
+                                                            </div>
+                                                            <div>
+                                                                <span className="block text-gray-500">Regime Tributário</span>
+                                                                <span className="font-medium">{dados.regimeTributario}</span>
+                                                            </div>
+                                                            {aceite?.responsavelAceite && (
+                                                                <div className="md:col-span-2 mt-2 pt-2 border-t border-gray-100">
+                                                                    <span className="block text-gray-500">Aceite realizado por</span>
+                                                                    <span className="font-medium text-blue-900">{aceite.responsavelAceite}</span>
+                                                                    <span className="block text-xs text-gray-400">Em {formatDate(aceite.aceitoEm)}</span>
+                                                                </div>
+                                                            )}
                                                         </div>
 
                                                         {/* Contabilidade */}

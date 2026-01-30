@@ -36,9 +36,8 @@ export default function PropostaPublica() {
             const prop = getPropostaByHash(hash);
             if (prop) {
                 setProposta(current => {
-                    // Update only if status changes to avoid unnecessary re-renders in deep components
-                    if (current?.status !== prop.status) return prop;
-                    return current || prop;
+                    // Always update to ensure we have the latest data (e.g. aceite details)
+                    return prop;
                 });
                 setExpirada(isPropostaExpirada(prop.dataValidade));
             }
@@ -79,7 +78,7 @@ export default function PropostaPublica() {
             await gerarPDFProposta(proposta, { comAceite });
         } catch (error) {
             console.error(error);
-            alert('Erro ao gerar PDF');
+            alert(`Erro ao gerar PDF: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
         } finally {
             setGerandoPDF(false);
         }

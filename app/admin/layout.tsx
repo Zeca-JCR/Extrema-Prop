@@ -21,7 +21,7 @@ export default function AdminLayout({
 }) {
     const router = useRouter();
     const pathname = usePathname();
-    const { user, isLoading } = useAuth();
+    const { user, isLoading, logout } = useAuth();
 
     // Verificar qual link está ativo
     const isActive = (href: string) => {
@@ -110,6 +110,7 @@ export default function AdminLayout({
                             <button
                                 onClick={() => {
                                     if (confirm('Deseja realmente sair?')) {
+                                        logout();
                                         router.push('/login');
                                     }
                                 }}

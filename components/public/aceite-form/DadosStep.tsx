@@ -181,6 +181,10 @@ export default function DadosStep({ isFetchingCnpj, handleCnpjBlur, validarECont
                         {getError('dadosCadastrais.responsavel.cargo') && <p className="text-xs text-red-600 mt-1">{getError('dadosCadastrais.responsavel.cargo')}</p>}
                     </div>
                     <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">RG</label>
+                        <input {...register('dadosCadastrais.responsavel.rg')} className="input text-base md:text-sm" placeholder="RG" />
+                    </div>
+                    <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">CPF do Responsável *</label>
                         <div className="relative">
                             <Controller
