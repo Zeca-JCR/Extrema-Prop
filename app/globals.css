@@ -9,7 +9,7 @@
   --extrema-yellow-600: #F7C428;
   --accent-500: #6C63FF;
 
-  /* Status */
+  /* Status (Legacy Support) */
   --status-rascunho: #718096;
   --status-enviada: #4299e1;
   --status-aguardando: #ed8936;
@@ -18,23 +18,56 @@
   --status-recusada: #f56565;
   --status-expirada: #4a5568;
 
-  /* Fundacionais */
+  /* Semânticas */
+  --bg-page: #F8FAFC;
+  --bg-surface: #FFFFFF;
+  --text-primary: #1E293B;
+  --text-secondary: #64748B;
+
+  /* Legacy Variables (Restauradas para Admin) */
   --background: #f7fafc;
   --surface: #ffffff;
-  --text-primary: #2d3748;
-  --text-secondary: #718096;
+  --text-primary-legacy: #2d3748;
+  --text-secondary-legacy: #718096;
   --border: #e2e8f0;
 }
 
-/* Força a barra de rolagem para evitar deslocamento horizontal entre páginas */
+/* Hardcoded Utilities (Fail-safe for New Colors) */
+.bg-brand-purple {
+  background-color: #8B4FD3 !important;
+}
+
+.bg-brand-purple-dark {
+  background-color: #7640B8 !important;
+}
+
+.text-brand-purple {
+  color: #8B4FD3 !important;
+}
+
+.border-brand-purple {
+  border-color: #8B4FD3 !important;
+}
+
+.hover-bg-brand-purple:hover {
+  background-color: #7640B8 !important;
+}
+
+/* Base Reset & Fonts */
 html {
-  overflow-y: scroll;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--bg-page);
   color: var(--text-primary);
 }
+
+/* =========================================
+   LEGACY STYLES (Restored for Admin Dashboard)
+   ========================================= */
 
 /* Botões */
 .btn {
@@ -206,89 +239,87 @@ body {
   color: #4b5563;
 }
 
-/* Glassmorphism */
-.glass {
-  backdrop-filter: blur(12px);
-  background-color: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+/* Custom Text Shadow */
+.text-shadow-sm {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.glass-dark {
-  backdrop-filter: blur(12px);
-  background-color: rgba(17, 24, 39, 0.8);
-  border: 1px solid rgba(31, 41, 55, 0.2);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+/* =========================================
+   NEW MODERN UTILITIES
+   ========================================= */
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
 }
 
-/* Gradientes */
-.gradient-extrema {
-  background: linear-gradient(135deg, #8B4FD3 0%, #6C63FF 100%);
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.gradient-extrema-reverse {
-  background: linear-gradient(135deg, #6C63FF 0%, #8B4FD3 100%);
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
 }
 
-/* Animações Refinadas */
-.animate-fade-in-up {
-  opacity: 0;
-  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+.prose-purple a {
+  color: var(--extrema-purple-600);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
-
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
-.delay-400 { animation-delay: 400ms; }
-.delay-500 { animation-delay: 500ms; }
 
 @keyframes fadeInUp {
   from {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-/* Sombras Suaves (Modernas) */
-.shadow-soft {
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 0 3px rgba(0,0,0,0.02);
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
 }
 
-.shadow-soft-lg {
-  box-shadow: 0 10px 40px -5px rgba(0, 0, 0, 0.08), 0 0 5px rgba(0,0,0,0.03);
+.animate-fade-in-up {
+  opacity: 0;
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Card Moderno (Sem borda visível, foco na sombra) */
-.card-modern {
-  background-color: white;
-  border-radius: 1rem; /* 16px */
-  border: 1px solid rgba(0,0,0,0.04); /* Borda quase invisível */
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05); /* Sombra difusa */
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+.animate-slide-up {
+  animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Botões com Micro-interações */
-.btn-modern {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.75rem; /* 12px */
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-  position: relative;
-  overflow: hidden;
+.delay-100 {
+  animation-delay: 100ms;
 }
 
-.btn-modern:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 15px -3px rgba(139, 79, 211, 0.25);
+.delay-200 {
+  animation-delay: 200ms;
 }
 
-.btn-modern:active:not(:disabled) {
-  transform: scale(0.98) translateY(0);
+.delay-300 {
+  animation-delay: 300ms;
+}
+
+.delay-400 {
+  animation-delay: 400ms;
+}
+
+.delay-500 {
+  animation-delay: 500ms;
+}
+
+.glass-effect {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }

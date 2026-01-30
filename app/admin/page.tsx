@@ -61,11 +61,11 @@ export default function AdminDashboard() {
     return (
         <div className="space-y-6">
             {/* Welcome Banner */}
-            <div className="gradient-extrema rounded-xl p-8 text-white">
+            <div className="bg-gradient-to-r from-purple-800 to-purple-600 rounded-xl p-8 text-white shadow-lg">
                 <h1 className="text-3xl font-bold mb-2">
                     Bem-vindo, {user?.nome}! 👋
                 </h1>
-                <p className="text-white/90">
+                <p className="text-purple-100">
                     Sistema de Propostas Comerciais da Extrema Tecnologia
                 </p>
             </div>

@@ -15,10 +15,10 @@ export default function PixStep({
     copiarCodigoPix, copiado, setEtapa, irParaComprovante
 }: PixStepProps) {
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 pb-8">
             <div className="text-center">
                 <p className="text-gray-600 mb-2">Valor a pagar via PIX:</p>
-                <p className="text-3xl font-bold text-extrema-purple">
+                <p className="text-3xl font-bold text-brand-purple">
                     {formatCurrency(valorPix)}
                 </p>
                 {formaPagamento === 'parcelado' && (
@@ -44,16 +44,16 @@ export default function PixStep({
             {/* Código Copia e Cola */}
             <div className="bg-gray-50 rounded-lg p-4">
                 <p className="text-sm font-medium text-gray-700 mb-2">Código PIX (Copia e Cola):</p>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2">
                     <input
                         type="text"
                         value={pixPayload}
                         readOnly
-                        className="input flex-1 text-xs bg-white"
+                        className="input flex-1 text-xs bg-white border border-gray-300 rounded p-2"
                     />
                     <button
                         onClick={copiarCodigoPix}
-                        className={`btn ${copiado ? 'bg-green-500 text-white' : 'btn-primary'} whitespace-nowrap`}
+                        className={`flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-colors ${copiado ? 'bg-green-500 text-white' : 'bg-brand-purple text-white hover:bg-brand-purple-dark'} whitespace-nowrap`}
                     >
                         {copiado ? '✓ Copiado!' : '📋 Copiar'}
                     </button>
@@ -78,11 +78,11 @@ export default function PixStep({
             </div>
 
             {/* Botões */}
-            <div className="flex justify-between pt-4">
-                <button onClick={() => setEtapa('pagamento')} className="btn btn-secondary">
+            <div className="flex justify-between items-center pt-6 border-t border-gray-100 mt-6 md:static sticky bottom-0 bg-white md:bg-transparent p-4 md:p-0 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] md:shadow-none -mx-6 md:mx-0 z-10">
+                <button onClick={() => setEtapa('pagamento')} className="px-4 py-2 text-gray-600 font-medium hover:bg-gray-100 rounded-lg transition-colors">
                     ← Voltar
                 </button>
-                <button onClick={irParaComprovante} className="btn btn-primary">
+                <button onClick={irParaComprovante} className="px-6 py-3 bg-brand-purple text-white font-bold rounded-lg shadow-lg hover:bg-brand-purple-dark transition-all transform hover:-translate-y-0.5">
                     Já paguei, enviar comprovante →
                 </button>
             </div>
